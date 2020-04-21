@@ -1,0 +1,116 @@
+*{
+  padding: 0;
+  border: 0;
+  margin:0;
+}
+body{
+  background-color: #F3F3F3;
+  font-family: 'Fjalla One', sans-serif;
+  width: 100%;
+  height: 100%;
+}
+.cabecera{
+  padding-top:20px;
+  text-align: left;
+  top:0;
+  background-color:#DFDEE2;
+  height: 100%;
+  width: 100%;
+  position: sticky;
+}
+nav{
+  margin-top:30px;
+  background-color: #37323E;
+  width: 100%;
+  height: max-content;
+  text-align: center;
+
+}
+.landing-wrapper {
+height: 100%;
+}
+.cuerpo{
+  padding-top: 50px;
+  font-family: 'Roboto', sans-serif;
+  background-color:#F3F3F3;
+  width: 60%;
+  margin: auto;
+  height: auto;
+}
+ul {
+  width: 100%;
+  list-style-type: none;
+  overflow: hidden;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  padding: 14px 60px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+  background-color: #E26561;
+}
+
+
+/* Style inputs */
+.formulario input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Style the submit button */
+.formulario input[type=submit] {
+  width: 100%;
+  background-color: #37323E;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.formulario  textarea {
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 10px;
+  line-height: 30px;
+  height: 100px;
+  resize: none;
+  width: 100%; /* or whatever width you want to set */
+  }
+
+/* Add a background color to the submit button on mouse-over */
+.formulario input[type=submit]:hover {
+  background-color: #E26561;
+}
+
+form label {
+  font-weight:bold;
+  font-size: 30px;
+}
+
+
+.mensajeCorrecto {
+  margin: 0 auto;
+  width: fit-content;
+  text-align: center;
+  background-color: #7FFFD4;
+  border-radius: 8px;
+  border-color: #37323E;
+  border-width: 3px;
+  border-style: solid;
+  padding: 30px;
+}
