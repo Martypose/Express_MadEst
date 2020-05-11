@@ -17,7 +17,7 @@ router.post('/', function(req, res, next) {
 
   let transporter = mailer.transporter;
   let mailOptions = {
-    from: email, // sender address
+    from: email, // non fai nada
     to: 'martinpose@hotmail.com', // list of receivers
     subject: asunto, // Subject line
     text: `De parte de ${email} \nEl mensaje:  ${mensaje}` 
