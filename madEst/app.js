@@ -29,6 +29,7 @@ app.use('/productos', productosRouter);
 app.use('/compras', comprasRouter);
 app.use('/contacto', contactoRouter);
 app.use('/compras/exito', comprasRouter);
+app.use('/contacto/exito', contactoRouter);
 
 
 
