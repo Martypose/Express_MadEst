@@ -10,6 +10,7 @@ const serradoRouter = require('./routes/serrado');
 const productosRouter = require('./routes/productos');
 const comprasRouter = require('./routes/compras');
 const contactoRouter = require('./routes/contacto');
+const paquetesRouter = require('./routes/paquetes')
 const app = express();
 
 // view engine setup
@@ -28,8 +29,8 @@ app.use('/serrado', serradoRouter);
 app.use('/productos', productosRouter);
 app.use('/compras', comprasRouter);
 app.use('/contacto', contactoRouter);
-app.use('/compras/exito', comprasRouter);
-app.use('/contacto/exito', contactoRouter);
+app.use('/paquetes', paquetesRouter);
+
 
 
 
