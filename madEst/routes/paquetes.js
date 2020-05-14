@@ -6,9 +6,9 @@ var dbConn  = require('../lib/db')
 
 router.post('/', function(req, res, next) {
 
-    let idPaquete = req.body.paquete
+    let paquete = req.body.paquete
 
-    res.send("He guardo el paquete con id:" +idPaquete)
+    res.send("He guardo el paquete con id:" +paquete.id+' y cantidades: '+paquete.cantidades)
   
 
 
