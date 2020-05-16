@@ -15,7 +15,7 @@ router.post('/', function(req, res, next) {
   let observaciones = req.body.observaciones
 
   //enviar datos a mysql
-  dbConn.query('INSERT INTO avisos SET nombre=?, telefono=?, localizacion=?, especies=?, observaciones=?', [nombre,telefono,localizacion,especie,observaciones], function(err, result) {
+  dbConn.query('INSERT INTO avisos SET nombre=?, telefono=?, localizacion=?, especies=?, observaciones=?', [nombre, telefono, localizacion, especie, observaciones], function(err, result) {
     //if(err) throw err
     if (err) {
       console.log("Error en el insert")
