@@ -30,4 +30,21 @@ router.get('/exito', function(req, res, next) {
   res.render('avisoRecibido')
 });
 
+router.get('/avisos', function(req,res){
+  //Dos opciones, paquetes bajados o no.
+  //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
+  //En este caso según ->barroteado:
+
+  dbConn.query(`SELECT * FROM avisos;`, function (err, result, fields) {
+    if (err) {
+      console.log('Error en la consulta a la bd '+ err)
+    }
+    console.log(result);
+    res.json(result);
+  });
+  //Enviar resultado en forma de JSON
+
+  
+})
+
 module.exports = router
