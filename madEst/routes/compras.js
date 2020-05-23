@@ -15,7 +15,7 @@ router.post('/', function(req, res, next) {
   let observaciones = req.body.observaciones
 
   //enviar datos a mysql
-  dbConn.query('INSERT INTO avisos SET nombre=?, telefono=?, localizacion=?, especies=?, observaciones=?', [nombre, telefono, localizacion, especie, observaciones], function(err, result) {
+  dbConn.query('INSERT INTO avisos SET nombre=?, telefono=?, localizacion=?, especies=?, observaciones=?, fecha=curdate()', [nombre, telefono, localizacion, especie, observaciones], function(err, result) {
     //if(err) throw err
     if (err) {
       console.log("Error en el insert")
@@ -33,9 +33,9 @@ router.get('/exito', function(req, res, next) {
 router.get('/avisos', function(req,res){
   //Dos opciones, paquetes bajados o no.
   //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
-  //En este caso según ->barroteado:
+  //En este caso según ->vista:
 
-  dbConn.query(`SELECT * FROM avisos;`, function (err, result, fields) {
+  dbConn.query(`SELECT * FROM avisos WHERE vista=${req.query.vista};`, function (err, result, fields) {
     if (err) {
       console.log('Error en la consulta a la bd '+ err)
     }
