@@ -23,6 +23,23 @@ router.post('/', function(req, res) {
   
 })
 
+router.post('/buscarPaquetes', function(req, res) {
+
+  let consulta = req.body.consulta
+
+  dbConn.query(consulta, function (err, result, fields) {
+    if (err) {
+      console.log('Error en la consulta a la bd '+ err)
+    }
+    console.log(result);
+    //Enviar resultado en forma de JSON
+    res.json(result);
+  });
+
+  
+
+})
+
 //Si hacemos un get
 router.get('/', function(req,res){
   //Dos opciones, paquetes bajados o no.
@@ -34,11 +51,14 @@ router.get('/', function(req,res){
       console.log('Error en la consulta a la bd '+ err)
     }
     console.log(result);
+    //Enviar resultado en forma de JSON
     res.json(result);
   });
-  //Enviar resultado en forma de JSON
+  
 
   
 })
+
+
 
 module.exports = router

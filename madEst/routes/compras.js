@@ -33,7 +33,7 @@ router.get('/exito', function(req, res, next) {
 router.get('/avisos', function(req,res){
   //Dos opciones, paquetes bajados o no.
   //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
-  //En este caso según ->vista:
+  //En este caso según ->vista: (si la madera ha sido vista o no)
 
   dbConn.query(`SELECT * FROM avisos WHERE vista=${req.query.vista};`, function (err, result, fields) {
     if (err) {
@@ -46,5 +46,40 @@ router.get('/avisos', function(req,res){
 
   
 })
+
+
+router.put(`/avisos/:id`, (request, res) => {
+  const idAviso = Number(request.params.id);
+
+  //Actualizar el aviso en la BD
+  dbConn.query('UPDATE avisos SET vista=? WHERE id=?', [1, idAviso], function(err, result) {
+    //if(err) throw err
+    if (err) {
+      console.log("Error en el update")
+    } else {
+        //mostrar mensaje éxito
+        res.send('Actualizado con éxito.')
+    }
+  })
+
+  
+});
+
+router.delete(`/avisos/:id`, (request, res) => {
+  const idAviso = Number(request.params.id);
+
+  //Actualizar el aviso en la BD
+  dbConn.query('DELETE FROM avisos WHERE id=?', [idAviso], function(err, result) {
+    //if(err) throw err
+    if (err) {
+      console.log("Error en el update")
+    } else {
+        //mostrar mensaje éxito
+        res.send('borrado con éxito.')
+    }
+  })
+
+  
+});
 
 module.exports = router
