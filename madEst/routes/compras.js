@@ -18,7 +18,7 @@ router.post('/', function(req, res, next) {
   dbConn.query('INSERT INTO avisos SET nombre=?, telefono=?, localizacion=?, especies=?, observaciones=?, fecha=curdate()', [nombre, telefono, localizacion, especie, observaciones], function(err, result) {
     //if(err) throw err
     if (err) {
-      console.log("Error en el insert")
+      console.log("Error en el insert"+err.message)
     } else {
         //mostrar mensaje éxito
         res.redirect('compras/exito')
@@ -49,7 +49,7 @@ router.get('/avisos', function(req,res){
 
 
 router.put(`/avisos/:id`, (request, res) => {
-  const idAviso = Number(request.params.id);
+  let idAviso = Number(request.params.id);
 
   //Actualizar el aviso en la BD
   dbConn.query('UPDATE avisos SET vista=? WHERE id=?', [1, idAviso], function(err, result) {
