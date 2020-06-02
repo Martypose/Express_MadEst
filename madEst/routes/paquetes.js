@@ -16,6 +16,8 @@ router.post('/', function(req, res) {
 
           if(err.errno==1062){
             res.send('id repetido');
+          }else{
+            res.send('error insert');
           }
         } else {
             //mostrar mensaje éxito
