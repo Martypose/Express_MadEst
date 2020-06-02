@@ -1,10 +1,11 @@
 const express = require('express');
+const seguridad = require('../lib/seguridad')
 const router = express.Router();
 var dbConn  = require('../lib/db')
 
 //Si hacemos una request de tipo post a la dirección actual
 
-router.post('/', function(req, res) {
+router.post('/',seguridad, function(req, res) {
 
     let paquete = req.body.paquete
 
@@ -69,7 +70,7 @@ router.put('/:id', function(req, res) {
 })
 
 //Si hacemos un get
-router.get('/', function(req,res){
+router.get('/',seguridad, function(req,res){
   //Dos opciones, paquetes macizos o no.
   //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
   //En este caso según ->barroteado:

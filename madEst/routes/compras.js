@@ -1,5 +1,6 @@
 var express = require('express')
 var dbConn  = require('../lib/db')
+const seguridad = require('../lib/seguridad')
 var router = express.Router()
 
 /* GET compras page. */
@@ -26,13 +27,12 @@ router.post('/', function(req, res, next) {
   })
 });
 
-router.get('/exito', function(req, res, next) {
+router.get('/exito' , function(req, res, next) {
   res.render('avisoRecibido')
 });
 
-router.get('/avisos', function(req,res){
-  //Dos opciones, paquetes bajados o no.
-  //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
+router.get('/avisos', seguridad ,function(req,res){
+
   //En este caso según ->vista: (si la madera ha sido vista o no)
 
   dbConn.query(`SELECT * FROM avisos WHERE vista=${req.query.vista};`, function (err, result, fields) {
@@ -48,7 +48,7 @@ router.get('/avisos', function(req,res){
 })
 
 
-router.put(`/avisos/:id`, (request, res) => {
+router.put(`/avisos/:id`, seguridad , (request, res) => {
   let idAviso = Number(request.params.id);
 
   //Actualizar el aviso en la BD
@@ -65,7 +65,7 @@ router.put(`/avisos/:id`, (request, res) => {
   
 });
 
-router.delete(`/avisos/:id`, (request, res) => {
+router.delete(`/avisos/:id`, seguridad , (request, res) => {
   const idAviso = Number(request.params.id);
 
   //Actualizar el aviso en la BD
