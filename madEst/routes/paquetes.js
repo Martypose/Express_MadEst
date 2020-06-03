@@ -30,7 +30,7 @@ router.post('/',seguridad, function(req, res) {
   
 })
 
-router.post('/buscarPaquetes', function(req, res) {
+router.post('/buscarPaquetes', seguridad, function(req, res) {
 
   let consulta = req.body.consulta
 
@@ -47,7 +47,7 @@ router.post('/buscarPaquetes', function(req, res) {
 
 })
 
-router.put('/:id', function(req, res) {
+router.put('/:id', seguridad ,function(req, res) {
 
   let idPaquete = Number(req.params.id)
   let paquete = req.body.paquete
