@@ -32,9 +32,6 @@ app.use('/contacto', contactoRouter);
 app.use('/paquetes', paquetesRouter);
 
 
-
-
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
