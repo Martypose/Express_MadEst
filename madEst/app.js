@@ -4,13 +4,16 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
+//Importamos rutas
 const indexRouter = require('./routes/index');
 const empresaRouter = require('./routes/empresa');
 const serradoRouter = require('./routes/serrado');
 const productosRouter = require('./routes/productos');
 const comprasRouter = require('./routes/compras');
 const contactoRouter = require('./routes/contacto');
-const paquetesRouter = require('./routes/paquetes')
+const paquetesRouter = require('./routes/paquetes');
+
+
 const app = express();
 
 // view engine setup
@@ -23,6 +26,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+//Rutas que usamos, y que acontece en cada una está dentro de cada archivo
 app.use('/', indexRouter);
 app.use('/empresa', empresaRouter);
 app.use('/serrado', serradoRouter);

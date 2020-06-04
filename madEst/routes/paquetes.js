@@ -9,15 +9,17 @@ router.post('/',seguridad, function(req, res) {
 
     let paquete = req.body.paquete
 
-    //Guardar paquete
+    //Guardar paquete en BD
     dbConn.query('INSERT INTO paquete SET id=?, ancho=?, fechaCreacion=?, seco=?, estado=?, barroteado=?, homogeneo=?, cantidades=?, grosor=?, largo=?, cubico=?, numpiezas=?, calidad=?', [paquete.id, paquete.ancho, paquete.fecha, paquete.seco, paquete.estado,paquete.barroteado, paquete.homogeneo,paquete.cantidades, paquete.grosor, paquete.largo, paquete.cubico, paquete.numpiezas, paquete.calidad], function(err, result) {
         //if(err) throw err
         if (err) {
           console.log("Error en el insert "+ err.errno)
 
+          //Sí el error clave duplicada informamos
           if(err.errno==1062){
             res.send('id repetido');
           }else{
+          //Informamos de otro error
             res.send('error insert');
           }
         } else {
