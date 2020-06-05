@@ -16,6 +16,7 @@ const paquetesRouter = require('./routes/paquetes');
 
 const app = express();
 
+//Aquí indicamos la configuración de nuestras views, en este caso Handlebars y automáticamente sabe que el layout base predefinido es layaout.hbs
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
