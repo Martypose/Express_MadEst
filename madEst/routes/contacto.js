@@ -32,13 +32,7 @@ router.post('/', function(req, res, next) {
       console.log(info);
       //mostrar mensaje éxito
       res.redirect('contacto/exito')
-
-
  });
-  
-
-
-
 });
 
 router.get('/exito', function(req, res, next) {

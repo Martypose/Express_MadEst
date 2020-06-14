@@ -40,9 +40,9 @@ router.get('/avisos', seguridad ,function(req,res){
       console.log('Error en la consulta a la bd '+ err)
     }
     console.log(result);
+      //Enviar resultado en forma de JSON
     res.json(result);
   });
-  //Enviar resultado en forma de JSON
 
   
 })
