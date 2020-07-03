@@ -76,8 +76,9 @@ router.get('/',seguridad, function(req,res){
   //Dos opciones, paquetes macizos o no.
   //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
   //En este caso según ->barroteado:
+  let barroteado = req.query.barroteado;
 
-  dbConn.query(`SELECT * FROM paquete WHERE barroteado=${req.query.barroteado} AND estado='stock';`, function (err, result, fields) {
+  dbConn.query(`SELECT * FROM paquete WHERE barroteado=? AND estado=?;`,[barroteado,'stock'], function (err, result, fields) {
     if (err) {
       console.log('Error en la consulta a la bd '+ err)
     }
@@ -85,8 +86,6 @@ router.get('/',seguridad, function(req,res){
     //Enviar resultado en forma de JSON
     res.json(result);
   });
-  
-
   
 })
 
