@@ -28,8 +28,6 @@ router.post('/',seguridad, function(req, res) {
             res.send('exito al guardar en bd');
         }
       })
-    
-  
 })
 
 router.post('/buscarPaquetes', seguridad, function(req, res) {
