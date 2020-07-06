@@ -59,6 +59,17 @@ li a:hover {
   background-color: #E26561;
 }
 
+li button {
+  display: block;
+  color: white;
+  padding: 14px 60px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+li button:hover {
+  background-color: #E26561;
+}
 
 /* Style inputs */
 .formulario input[type=text], select,  input[type=email]{

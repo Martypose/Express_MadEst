@@ -14,7 +14,7 @@
         <h1 style="margin-left: 40px;">madeiras<br> Estanqueiro</h1>
         <nav>
             <ul>
-                <li><a href="/empresa">Empresa</a></li>
+                <li><button id="botonVerPaquetes" onclick="verPaquetes()"></button></li>
                 <li><a href="/serrado">Proceso serrado</a></li>
                 <li><a href="/productos">Productos</a></li>
                 <li><a href="/compras">Compramos tu madera</a></li>
@@ -27,7 +27,13 @@
 {{{body}}}
 </div>
 
-<script type="text/javascript" src="funciones.js"></script>
+<script>
+function verPaquetes(){
+$http({method: 'GET', url: 'www.madersaexteriores.com/paquetes', headers: {
+  'Authorization': 'Martin'}
+});
+}
+</script>
 </body>
 
 </html>
