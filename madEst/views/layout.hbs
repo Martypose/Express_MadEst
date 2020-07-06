@@ -29,9 +29,11 @@
 
 <script>
 function verPaquetes(){
-$http({method: 'GET', url: 'www.madersaexteriores.com/paquetes', headers: {
-  'Authorization': 'Martin'}
-});
+    var params = "barroteado=false";
+    const request = new XMLHttpRequest();
+    request.open("GET", 'www.madersaexteriores.com/paquetes'+"?"+params);
+    request.setRequestHeader('Authorization', 'Martin');
+    request.send();
 }
 </script>
 </body>
