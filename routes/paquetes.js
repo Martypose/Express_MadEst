@@ -86,7 +86,4 @@ router.get('/',seguridad, function(req,res){
     res.json(result);
   });
 })
-
-
-
 module.exports = router
