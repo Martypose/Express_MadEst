@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 
 //Si recibimos post
 
-router.post('/', seguridad, function(req, res) {
+router.post('/', function(req, res) {
 
     let username = req.body.username
     let password = req.body.password
