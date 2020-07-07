@@ -11,32 +11,8 @@
     <title>{{title}}</title>
 </head>
 <body>
-<div class="cabecera">
-        <h1 style="margin-left: 40px;">madeiras<br> Estanqueiro</h1>
-        <nav>
-            <ul>
-                <li><button value="Paquetes" id="botonVerPaquetes" onclick="verPaquetes()"></button></li>
-                <li><a href="/serrado">Proceso serrado</a></li>
-                <li><a href="/productos">Productos</a></li>
-                <li><a href="/compras">Compramos tu madera</a></li>
-                <li style="float:right"><a href="/contacto">Contacto</a></li>
-            </ul>
-        </nav>
-</div>
-
 <div class="cuerpo" id="cuerpo">
 {{{body}}}
 </div>
-<script>
-function verPaquetes(){
-    var params = "barroteado=0";
-    const request = new XMLHttpRequest();
-    request.open("GET", '/paquetes'+"?"+params);
-    request.setRequestHeader('Authorization', 'Martin');
-	request.setRequestHeader('accept', 'application/json');
-	request.setRequestHeader('Content-Type', 'application/json');
-    request.send();
-}
-</script>
 </body>
 </html>
