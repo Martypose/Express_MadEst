@@ -12,19 +12,12 @@ router.get('/', function(req, res, next) {
 
 //Si recibimos post
 
-router.post('/', function(req, res) {
+router.post('/', passport.authenticate('local.login',{
 
-    let username = req.body.username
-    let password = req.body.password
-
-   passport.authenticate('local.login', {
     successRedirect: '/profile',
     failureRedirect: '/login',
     failureFlash: true
-   });
-
-   res.send('recibido');
-  })
+   }));
 
 
   router.get('/profile', function(req, res) {
