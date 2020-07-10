@@ -18,11 +18,12 @@ router.post('/', function(req, res) {
     let password = req.body.password
 
    passport.authenticate('local.login', {
-
     successRedirect: '/profile',
     failureRedirect: '/login',
     failureFlash: true
    });
+
+   res.send('recibido');
   })
 
 
