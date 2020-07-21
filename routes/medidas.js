@@ -32,9 +32,9 @@ router.get('/',function(req,res){
   })
 
   router.delete('/:id',function(req,res){
-    console.log(`intentando borrar ${req.query.id}`)
+    console.log(`intentando borrar ${request.params.id}`)
   
-    dbConn.query('DELETE FROM medidas WHERE id=?',[req.query.id], function (err, result) {
+    dbConn.query('DELETE FROM medidas WHERE id=?',[request.params.id], function (err, result) {
       if (err) {
         console.log('Error en el borrado'+ err)
       }
