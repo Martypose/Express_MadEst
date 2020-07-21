@@ -19,6 +19,7 @@ router.get('/',function(req,res){
 
   router.post('/',function(req,res){
     let medida = req.body.medida
+    console.log(medida)
   
     dbConn.query(`Insert into medidas VALUES(?),`[medida], function (err, result) {
       if (err) {
