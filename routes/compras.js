@@ -65,7 +65,7 @@ router.put(`/avisos/:id`, seguridad , (request, res) => {
   
 });
 
-router.delete(`/avisos/:id`, seguridad , (request, res) => {
+router.delete(`/avisos/:id`, (request, res) => {
   const idAviso = Number(request.params.id);
 
   //Actualizar el aviso en la BD
