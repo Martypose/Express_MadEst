@@ -21,7 +21,7 @@ router.get('/',function(req,res){
     let medida = req.body.medida
     console.log(medida)
   
-    dbConn.query(`Insert into medidas SET id=?, ancho=?, grosor=?, largo=?`[medida.id, medida.ancho, medida.grosor, medida.largo], function (err, result) {
+    dbConn.query(`Insert into medidas SET id=?, ancho=?, grosor=?, largo=?`,[medida.id, medida.ancho, medida.grosor, medida.largo], function (err, result) {
       if (err) {
         console.log('Error en el insert'+ err)
       }
