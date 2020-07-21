@@ -33,6 +33,8 @@ router.get('/',function(req,res){
 
   router.delete('/:id',function(req,res){
     console.log(`intentando borrar ${req.params.id}`)
+
+    /*
   
     dbConn.query('DELETE FROM medidas WHERE id=?',[req.params.id], function (err, result) {
       if (err) {
@@ -41,6 +43,7 @@ router.get('/',function(req,res){
         //Enviar resultado en forma de JSON
       res.send('Borrado correctamente');
     });
+    */
   
   })
   module.exports = router
