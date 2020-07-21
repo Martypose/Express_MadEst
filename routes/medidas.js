@@ -16,6 +16,19 @@ router.get('/',function(req,res){
     });
   
   })
+
+  router.post('/',function(req,res){
+    let medida = req.body.medida
+  
+    dbConn.query(`Insert into medidas VALUES(?),`[medida], function (err, result) {
+      if (err) {
+        console.log('Error en el insert'+ err)
+      }
+        //Enviar resultado en forma de JSON
+      res.send('Se ha insertado correctamente');
+    });
+  
+  })
   module.exports = router
 
   
