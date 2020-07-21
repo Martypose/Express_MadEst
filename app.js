@@ -29,6 +29,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(require('cors')());
 
 
 //Rutas que usamos, y que acontece en cada una está dentro de cada archivo
