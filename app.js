@@ -22,9 +22,6 @@ require('./lib/passport');
 
 //Aquí indicamos la configuración de nuestras views, en este caso Handlebars y automáticamente sabe que el layout base predefinido es layaout.hbs
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -59,7 +56,6 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
 });
 
 module.exports = app;
