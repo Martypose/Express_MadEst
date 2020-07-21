@@ -1,4 +1,3 @@
-# ProyectoDamNode
- Parte server y web proyecto DAM.
+#Express_MadEst
 
- Utilizando Express como servidor, Handlebars para plantillas y MySQL como base de datos.
+ Servidor Api Rest desarrollado con express. 
