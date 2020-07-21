@@ -31,8 +31,8 @@ router.get('/',function(req,res){
   
   })
 
-  router.delete('/:id',function(req,res){
-    console.log(`intentando borrar ${req.params.id}`)
+  router.delete('/',function(req,res){
+    console.log(`intentando borrar}`)
 
     /*
   
