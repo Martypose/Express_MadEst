@@ -30,6 +30,19 @@ router.get('/',function(req,res){
     });
   
   })
+
+  router.delete('/:id',function(req,res){
+    console.log(`intentando borrar ${req.query.id}`)
+  
+    dbConn.query('DELETE FROM medidas WHERE id=?',[req.query.id], function (err, result) {
+      if (err) {
+        console.log('Error en el borrado'+ err)
+      }
+        //Enviar resultado en forma de JSON
+      res.send('Borrado correctamente');
+    });
+  
+  })
   module.exports = router
 
   
