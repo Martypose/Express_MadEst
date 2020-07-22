@@ -3,7 +3,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const passport = require('passport');
 
 //Importamos rutas
 const indexRouter = require('./routes/index');
@@ -18,7 +17,7 @@ const medidasRouter = require('./routes/medidas');
 
 
 const app = express();
-require('./lib/passport');
+
 
 //Aquí indicamos la configuración de nuestras views, en este caso Handlebars y automáticamente sabe que el layout base predefinido es layaout.hbs
 // view engine setup
@@ -27,9 +26,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(require('cors')());
 
 
 //Rutas que usamos, y que acontece en cada una está dentro de cada archivo
