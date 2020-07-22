@@ -72,7 +72,7 @@ router.delete(`/avisos/:id`, seguridad, (request, res) => {
   dbConn.query('DELETE FROM avisos WHERE id=?', [idAviso], function(err, result) {
     //if(err) throw err
     if (err) {
-      console.log("Error en el update")
+      console.log("Error en el delete")
     } else {
         //mostrar mensaje éxito
         res.send('borrado con éxito.')
