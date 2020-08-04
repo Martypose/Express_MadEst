@@ -77,7 +77,7 @@ router.get('/',seguridad, function(req,res){
   //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
   //En este caso según ->barroteado:
 
-  dbConn.query(`SELECT * FROM paquete ;`, function (err, result, fields) {
+  dbConn.query(`Select *  from paquete as a,medidas as b where a.medida=b.id;`, function (err, result, fields) {
     if (err) {
       console.log('Error en la consulta a la bd '+ err)
     }
