@@ -10,7 +10,7 @@ router.post('/',seguridad, function(req, res) {
     let paquete = req.body.paquete
 
     //Guardar paquete en BD
-    dbConn.query('INSERT INTO paquete SET id=?, ancho=?, fechaCreacion=?, seco=?, estado=?, barroteado=?, homogeneo=?, cantidades=?, grosor=?, largo=?, cubico=?, numpiezas=?, calidad=?', [0,paquete.ancho, paquete.fecha, paquete.seco, paquete.estado,paquete.barroteado, paquete.homogeneo,paquete.cantidades, paquete.grosor, paquete.largo, paquete.cubico, paquete.numpiezas, paquete.calidad], function(err, result) {
+    dbConn.query('INSERT INTO paquete SET id=?,fechaCreacion=?, seco=?, estado=?, cantidades=?, cubico=?, numpiezas=?, medida=?', [0, paquete.fecha, paquete.seco, paquete.estado,paquete.cantidades, paquete.cubico, paquete.numpiezas, paquete.medida], function(err, result) {
         //if(err) throw err
         if (err) {
           console.log("Error en el insert "+ err.errno)
