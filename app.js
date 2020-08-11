@@ -18,7 +18,7 @@ const transporteRouter = require('./routes/transporte');
 const loginRouter = require('./routes/login');
 const medidasRouter = require('./routes/medidas');
 
-const seguridad = require('../lib/seguridad')
+const seguridad = require('./lib/seguridad')
 
 
 const app = express();
