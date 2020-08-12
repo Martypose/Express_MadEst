@@ -16,4 +16,18 @@ router.get('/transportista', function(req,res){
     res.json(result);
   });
 })
+
+router.get('/conductor', function(req,res){
+  //Dos opciones, paquetes macizos o no.
+  //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
+  //En este caso según ->barroteado:
+
+  dbConn.query(`Select * from conductor;`, function (err, result, fields) {
+    if (err) {
+      console.log('Error en la consulta a la bd '+ err)
+    }
+    //Enviar resultado en forma de JSON
+    res.json(result);
+  });
+})
 module.exports = router
