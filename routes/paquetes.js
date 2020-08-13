@@ -56,6 +56,7 @@ router.put('/:id', seguridad ,function(req, res) {
       //if(err) throw err
       if (err) {
         console.log("Error en el update "+ err)
+        res.send('Error'+err.message)
       } else {
           //mostrar mensaje éxito
           console.log('exito al guardar en bd');
