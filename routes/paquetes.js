@@ -73,9 +73,6 @@ router.put('/:id', seguridad ,function(req, res) {
 
 //Si hacemos un get
 router.get('/',seguridad, function(req,res){
-  //Dos opciones, paquetes macizos o no.
-  //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
-  //En este caso según ->barroteado:
 
   dbConn.query(`Select *  from paquete as a,medidas as b where a.medida=b.id;`, function (err, result, fields) {
     if (err) {

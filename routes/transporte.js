@@ -18,9 +18,6 @@ router.get('/transportista', function(req,res){
 })
 
 router.get('/conductor', function(req,res){
-  //Dos opciones, paquetes macizos o no.
-  //Hago una consulta a la BD con el parámetro que me llega para elegir un o otro tipo
-  //En este caso según ->barroteado:
 
   dbConn.query(`Select * from conductor;`, function (err, result, fields) {
     if (err) {
