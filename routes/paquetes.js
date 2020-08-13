@@ -51,12 +51,15 @@ router.post('/buscarPaquetes', seguridad, function(req, res) {
 
 router.put('/:id', seguridad ,function(req, res) {
 
+  let idPaquete = Number(req.params.id)
+  let estado = req.body.estado
+
   //Guardar paquete
-  dbConn.query('UPDATE paquete SET fechaCreacion=?, estado=?, cantidades=?, cubico=?, numpiezas=?, medida=? WHERE id=?', [paquete.fecha, paquete.estado,paquete.cantidades, paquete.cubico, paquete.numpiezas, paquete.medida, paquete.ID], function(err, result) {
+  dbConn.query('UPDATE paquete SET estado=?b WHERE ID=?', [estado, idPaquete], function(err, result) {
       //if(err) throw err
       if (err) {
         console.log("Error en el update "+ err)
-        res.send('Error'+err.message)
+        res.send('Error '+err.message);
       } else {
           //mostrar mensaje éxito
           console.log('exito al guardar en bd');
