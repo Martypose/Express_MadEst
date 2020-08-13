@@ -55,7 +55,7 @@ router.put('/:id', seguridad ,function(req, res) {
   let estado = req.body.estado
 
   //Guardar paquete
-  dbConn.query('UPDATE paquete SET estado=?b WHERE ID=?', [estado, idPaquete], function(err, result) {
+  dbConn.query('UPDATE paquete SET estado=? WHERE ID=?', [estado, idPaquete], function(err, result) {
       //if(err) throw err
       if (err) {
         console.log("Error en el update "+ err)
