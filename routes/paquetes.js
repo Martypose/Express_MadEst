@@ -51,12 +51,8 @@ router.post('/buscarPaquetes', seguridad, function(req, res) {
 
 router.put('/:id', seguridad ,function(req, res) {
 
-  let idPaquete = Number(req.params.id)
-  let paquete = req.body.paquete
-  console.log(paquete.estado)
-
   //Guardar paquete
-  dbConn.query('UPDATE paquete SET ancho=?, fechaCreacion=?, seco=?, estado=?, barroteado=?, homogeneo=?, cantidades=?, grosor=?, largo=?, cubico=?, numpiezas=?, calidad=? WHERE id=?', [paquete.ancho, paquete.fecha, paquete.seco, paquete.estado,paquete.barroteado, paquete.homogeneo,paquete.cantidades, paquete.grosor, paquete.largo, paquete.cubico, paquete.numpiezas, paquete.calidad, idPaquete], function(err, result) {
+  dbConn.query('UPDATE paquete SET fechaCreacion=?, estado=?, cantidades=?, cubico=?, numpiezas=?, medida=? WHERE id=?', [paquete.fecha, paquete.estado,paquete.cantidades, paquete.cubico, paquete.numpiezas, paquete.medida, paquete.id], function(err, result) {
       //if(err) throw err
       if (err) {
         console.log("Error en el update "+ err)
