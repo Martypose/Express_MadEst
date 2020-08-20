@@ -30,7 +30,7 @@ router.post('/',seguridad, function(req, res) {
                 console.log('Error en la consulta a la bd '+ err)
               }
               //Enviar resultado en forma de JSON
-              res.send(JSON.parse(result[0]).ID);
+              res.send(JSON.parse(JSON.stringify(result[0])).ID);
             });
         }
       })
