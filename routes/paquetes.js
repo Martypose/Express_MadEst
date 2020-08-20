@@ -25,7 +25,13 @@ router.post('/',seguridad, function(req, res) {
         } else {
             //mostrar mensaje éxito
             console.log('exito al guardar en bd');
-            res.send('exito al guardar en bd');
+            dbConn.query('SELECT MAX(ID) FROM paquete;', function (err, result, fields) {
+              if (err) {
+                console.log('Error en la consulta a la bd '+ err)
+              }
+              //Enviar resultado en forma de JSON
+              res.send(`Añadido paquete, número: ${result}`);
+            });
         }
       })
     
