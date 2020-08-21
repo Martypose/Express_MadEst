@@ -31,8 +31,8 @@ router.post('/',seguridad, function(req, res) {
               }         
               let results=JSON.parse(JSON.stringify(result))
               //Enviar resultado en forma de JSON
-        
-              res.send(results[0].id);
+              let numero=results[0].id;
+              res.send(numero);
 
             });
         }
