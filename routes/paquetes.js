@@ -28,11 +28,9 @@ router.post('/',seguridad, function(req, res) {
             dbConn.query('SELECT MAX(ID) as id FROM paquete;', function (err, result, fields) {
               if (err) {
                 console.log('Error en la consulta a la bd '+ err)
-              }else{
-                result=JSON.parse(JSON.stringify(result));
-              }
+              }         
               //Enviar resultado en forma de JSON
-              res.send(result);
+              res.send(result[0][0].id);
 
             });
         }
