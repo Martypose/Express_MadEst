@@ -29,10 +29,10 @@ router.post('/',seguridad, function(req, res) {
               if (err) {
                 console.log('Error en la consulta a la bd '+ err)
               }         
+              let results=JSON.parse(JSON.stringify(result))
               //Enviar resultado en forma de JSON
-              console.log(result);
-              console.log(result[0].RowDataPacket.id);
-              res.send(result);
+              console.log(results);
+              console.log(results[0]);
 
             });
         }
