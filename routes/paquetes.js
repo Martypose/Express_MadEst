@@ -32,7 +32,7 @@ router.post('/',seguridad, function(req, res) {
               let results=JSON.parse(JSON.stringify(result))
               //Enviar resultado en forma de JSON
               let numero=results[0].id.toString();
-              res.send(numero);
+              res.send(`Éxito! El numero de paquete es: ${numero}`);
 
             });
         }
