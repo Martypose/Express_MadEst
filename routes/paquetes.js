@@ -31,7 +31,7 @@ router.post('/',seguridad, function(req, res) {
               }         
               //Enviar resultado en forma de JSON
               console.log(result);
-              console.log(result[0]);
+              console.log(result[0].RowDataPacket.id);
               res.send(result);
 
             });
