@@ -32,7 +32,7 @@ router.post('/',seguridad, function(req, res) {
                 result=JSON.parse(JSON.stringify(result));
               }
               //Enviar resultado en forma de JSON
-              res.send(result[0].id);
+              res.send(result);
 
             });
         }
