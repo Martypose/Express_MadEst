@@ -17,6 +17,8 @@ const paquetesRouter = require('./routes/paquetes');
 const transporteRouter = require('./routes/transporte');
 const loginRouter = require('./routes/login');
 const medidasRouter = require('./routes/medidas');
+const clientesRouter = require('./routes/clientes');
+
 
 const seguridad = require('./lib/seguridad')
 
@@ -44,7 +46,8 @@ app.use('/paquetes', paquetesRouter);
 app.use('/paquetes', paquetesRouter);
 app.use('/transporte', transporteRouter);
 app.use('/login', loginRouter);
-app.use('/medidas',medidasRouter)
+app.use('/medidas',medidasRouter);
+app.use('/clientes',clientesRouter);
 
 
 // catch 404 and forward to error handler
