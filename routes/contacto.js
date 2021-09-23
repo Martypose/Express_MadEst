@@ -4,7 +4,7 @@ const mailer = require('../lib/mailer');
 
 /* GET contacto page. */
 router.get('/', function(req, res, next) {
-  res.render('contacto');
+  res.send('contacto');
 });
 
 router.post('/', function(req, res, next) {
