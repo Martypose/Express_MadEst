@@ -9,7 +9,6 @@ const cors = require('cors');
 //Importamos rutas
 const indexRouter = require('./routes/index');
 const empresaRouter = require('./routes/empresa');
-const serradoRouter = require('./routes/serrado');
 const productosRouter = require('./routes/productos');
 const comprasRouter = require('./routes/compras');
 const contactoRouter = require('./routes/contacto');
@@ -38,7 +37,6 @@ app.use(cors());
 //Rutas que usamos, y que acontece en cada una está dentro de cada archivo
 app.use('/', indexRouter);
 app.use('/empresa', empresaRouter);
-app.use('/serrado', serradoRouter);
 app.use('/productos', productosRouter);
 app.use('/compras', comprasRouter);
 app.use('/contacto', contactoRouter);
