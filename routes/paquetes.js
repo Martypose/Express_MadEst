@@ -1,7 +1,7 @@
 const express = require('express');
 const seguridad = require('../lib/seguridad')
 const router = express.Router();
-var dbConn  = require('../lib/db')
+const dbConn  = require('../lib/db')
 
 //Si hacemos una request de tipo post a la dirección actual
 
