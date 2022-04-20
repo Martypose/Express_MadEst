@@ -3,26 +3,38 @@ const seguridad = require('../lib/seguridad')
 const router = express.Router();
 const dbConn  = require('../lib/db')
 
-//Si hacemos un get
+//postalogin
 router.post('/', function(req, res) {
-    const user = req.body.name
+    const username = req.body.name
     const password = req.body.password
 
+    const sqlSearch = "Select * from usuarios where username = ?"
+    const search_query = mysql.format(sqlSearch,[username])
 
+    await dbConn.query (search_query, async (err, result) => {
+      dbConn.release()
+     
+     if (err) throw (err)
+     if (result.length == 0) {
+      console.log("--------> User does not exist")
+      res.sendStatus(404)
+     }else {
+        const hashedPassword = result[0].password
+        //get the hashedPassword from result
+       if (await bcrypt.compare(password, hashedPassword)) {
+       console.log("---------> Login Successful")
+       res.send(`${user} is logged in!`)
+       } 
+       else {
+       console.log("---------> Password Incorrect")
+       res.send("Password incorrect!")
+       } //end of bcrypt.compare()
+     }//end of User exists i.e. results.length==0
+
+    });
 });
 
 
-//Si recibimos post
-
-router.post('/', passport.authenticate('local.login',{
-
-    successRedirect: '/profile',
-    failureRedirect: '/login',
-    failureFlash: true
-   }));
 
 
-  router.get('/profile', function(req, res) {
-      res.send("Este es tu perfil");
-  });
-  module.exports = router
+  module.exports = router;
