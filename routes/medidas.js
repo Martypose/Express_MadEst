@@ -1,10 +1,9 @@
 var express = require('express')
 var dbConn  = require('../lib/db')
 var router = express.Router()
+const verifyToken = require('../lib/validate-token');
 
 router.get('/',function(req,res){
-
-    //En este caso según ->vista: (si la madera ha sido vista o no)
   
     dbConn.query(`SELECT * FROM medidas;`, function (err, result, fields) {
       if (err) {
