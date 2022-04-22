@@ -6,7 +6,7 @@ const mysql = require("mysql")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 
-//postalogin
+//logear usuario
 router.post('/', async function(req, res) {
   
     const username = req.body.name
@@ -21,7 +21,9 @@ router.post('/', async function(req, res) {
      if (err) throw (err)
      if (result.length == 0) {
       console.log("--------> User does not exist")
-      res.sendStatus(404)
+      res.header().json({
+        message: 'Usuario no existe!',
+    })
      }else {
         const hashedPassword = result[0].password
         //get the hashedPassword from result
@@ -37,10 +39,11 @@ router.post('/', async function(req, res) {
         message: 'Bienvenido '+username+ '!',
         username: username
     })
-       } 
-       else {
+       } else {
        console.log("---------> Password Incorrect")
-       res.send("Password incorrect!")
+       res.header().json({
+        message: 'Password incorrecta!',
+    })
        } //end of bcrypt.compare()
      }//end of User exists i.e. results.length==0
 
