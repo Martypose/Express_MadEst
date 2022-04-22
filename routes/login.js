@@ -1,9 +1,10 @@
-const express = require('express');
+const express = require('express')
 const seguridad = require('../lib/seguridad')
-const router = express.Router();
+const router = express.Router()
 const dbConn  = require('../lib/db')
 const mysql = require("mysql")
 const bcrypt = require("bcrypt")
+const jwt = require('jsonwebtoken')
 
 //postalogin
 router.post('/', async function(req, res) {
@@ -25,8 +26,17 @@ router.post('/', async function(req, res) {
         const hashedPassword = result[0].password
         //get the hashedPassword from result
        if (await bcrypt.compare(password, hashedPassword)) {
+             // create token
+      const token = jwt.sign({
+      name: username,
+    }, process.env.TOKEN_SECRET)
+
        console.log("---------> Login Successful")
-       res.send(`${username} is logged in!`)
+       res.header('autorizado', token).json({
+        accessToken: {token},
+        message: 'Bienvenido '+username+ '!',
+        username: username
+    })
        } 
        else {
        console.log("---------> Password Incorrect")

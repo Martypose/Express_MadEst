@@ -20,6 +20,7 @@ const clientesRouter = require('./routes/clientes');
 
 
 const seguridad = require('./lib/seguridad')
+const verifyToken = require('./lib/validate-token');
 
 
 const app = express();
@@ -36,16 +37,16 @@ app.use(cors());
 
 //Rutas que usamos, y que acontece en cada una está dentro de cada archivo
 app.use('/', indexRouter);
-app.use('/empresa', empresaRouter);
-app.use('/productos', productosRouter);
-app.use('/compras', comprasRouter);
-app.use('/contacto', contactoRouter);
-app.use('/paquetes', paquetesRouter);
-app.use('/paquetes', paquetesRouter);
-app.use('/transporte', transporteRouter);
-app.use('/login', loginRouter);
-app.use('/medidas',medidasRouter);
-app.use('/clientes',clientesRouter);
+app.use('/empresa',verifyToken, empresaRouter);
+app.use('/productos',verifyToken, productosRouter);
+app.use('/compras',verifyToken, comprasRouter);
+app.use('/contacto',verifyToken ,contactoRouter);
+app.use('/paquetes',verifyToken, paquetesRouter);
+app.use('/paquetes',verifyToken, paquetesRouter);
+app.use('/transporte',verifyToken ,transporteRouter);
+app.use('/login',loginRouter);
+app.use('/medidas',verifyToken,medidasRouter);
+app.use('/clientes',verifyToken,clientesRouter);
 
 
 // catch 404 and forward to error handler
