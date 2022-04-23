@@ -1,7 +1,6 @@
 var express = require('express')
 var dbConn  = require('../lib/db')
 var router = express.Router()
-const verifyToken = require('../lib/validate-token');
 
 router.get('/',function(req,res){
   
@@ -20,7 +19,7 @@ router.get('/',function(req,res){
     let medida = req.body.medida
     console.log(medida)
   
-    dbConn.query(`Insert into medidas SET id=?, ancho=?, grosor=?, largo=?`,[medida.id, medida.ancho, medida.grosor, medida.largo], function (err, result) {
+    dbConn.query(`Insert into medidas SET id=?, ancho=?, grosor=?, largo=?, esMedible=?, barroteado=?, homogeneo=?, calidad=?`,[medida.id, medida.ancho, medida.grosor, medida.largo, medida.esMedible, medida.barroteado, medida.homogeneo, medida.calidad], function (err, result) {
       if (err) {
         console.log('Error en el insert'+ err)
       }
@@ -40,7 +39,6 @@ router.get('/',function(req,res){
         //Enviar resultado en forma de JSON
       res.send('Borrado correctamente');
     });
-  
   })
   module.exports = router
 
