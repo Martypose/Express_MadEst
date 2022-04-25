@@ -15,6 +15,19 @@ router.get('/',function(req,res){
   
   })
 
+  router.get('/calidades',function(req,res){
+  
+    dbConn.query(`SELECT * FROM calidad;`, function (err, result, fields) {
+      if (err) {
+        console.log('Error en la consulta a la bd '+ err)
+      }
+      console.log(result);
+        //Enviar resultado en forma de JSON
+      res.json(result);
+    });
+  
+  })
+
   router.post('/',function(req,res){
     let medida = req.body.medida
     console.log(medida)
