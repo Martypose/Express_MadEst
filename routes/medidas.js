@@ -30,11 +30,17 @@ router.get('/',function(req,res){
 
   router.post('/',function(req,res){
     let medida = req.body.medida
-    console.log(medida)
+    console.log('ancho:'+medida.ancho+'.')
+
+    if(medida.ancho==''){
+      medida.ancho=null;
+      console.log(medida.ancho)
+    }
+   
   
     dbConn.query(`Insert into medidas SET id=?, ancho=?, grosor=?, largo=?, esMedible=?, barroteado=?, homogeneo=?, calidad=?`,[medida.id, medida.ancho, medida.grosor, medida.largo, medida.esMedible, medida.barroteado, medida.homogeneo, medida.calidad], function (err, result) {
       if (err) {
-        console.log('Error en el insert'+ err)
+        console.log('Error en el insert:'+ err)
       }
         //Enviar resultado en forma de JSON
       res.send('Se ha insertado correctamente');
