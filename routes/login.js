@@ -1,10 +1,11 @@
 const express = require('express')
-const seguridad = require('../lib/seguridad')
 const router = express.Router()
 const dbConn  = require('../lib/db')
 const mysql = require("mysql")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
+
+const tokenList = {}
 
 //logear usuario
 router.post('/', async function(req, res) {
@@ -27,15 +28,20 @@ router.post('/', async function(req, res) {
      }else {
         const hashedPassword = result[0].password
         //get the hashedPassword from result
-       if (await bcrypt.compare(password, hashedPassword)) {
-             // create token
-      const token = jwt.sign({
-      name: username,
-    }, process.env.TOKEN_SECRET)
+    if (await bcrypt.compare(password, hashedPassword)) {
+        // create accesstoken
+    const accessToken = jwt.sign({
+      name: username
+    }, process.env.TOKEN_SECRET, {expiresIn: process.env.JWT_ACCESS_EXPIRATION})
+
+    const refreshToken = jwt.sign({
+      name: username
+    }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRATION})
 
        console.log("---------> Login Successful")
-       res.header('autorizado', token).json({
-        accessToken: {token},
+       res.header('autorizado').json({
+        accessToken: {accessToken},
+        refreshToken: {refreshToken},
         message: 'Bienvenido '+username+ '!',
         username: username
     })

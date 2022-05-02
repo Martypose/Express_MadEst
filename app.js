@@ -17,9 +17,9 @@ const transporteRouter = require('./routes/transporte');
 const loginRouter = require('./routes/login');
 const medidasRouter = require('./routes/medidas');
 const clientesRouter = require('./routes/clientes');
+const refreshTokensRouter = require('./routes/refreshToken');
 
-
-const seguridad = require('./lib/seguridad')
+//Seguridad, pedit token para acceder a las rutas
 const verifyToken = require('./lib/validate-token');
 
 
@@ -47,6 +47,7 @@ app.use('/transporte',verifyToken ,transporteRouter);
 app.use('/login',loginRouter);
 app.use('/medidas',verifyToken,medidasRouter);
 app.use('/clientes',verifyToken,clientesRouter);
+app.use('/refreshtoken',refreshTokensRouter);
 
 
 // catch 404 and forward to error handler
