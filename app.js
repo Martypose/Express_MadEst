@@ -42,7 +42,6 @@ app.use('/productos',verifyToken, productosRouter);
 app.use('/compras',verifyToken, comprasRouter);
 app.use('/contacto',verifyToken ,contactoRouter);
 app.use('/paquetes',verifyToken, paquetesRouter);
-app.use('/paquetes',verifyToken, paquetesRouter);
 app.use('/transporte',verifyToken ,transporteRouter);
 app.use('/login',loginRouter);
 app.use('/medidas',verifyToken,medidasRouter);
