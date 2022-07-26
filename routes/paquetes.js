@@ -1,11 +1,10 @@
 const express = require('express');
-const seguridad = require('../lib/seguridad')
 const router = express.Router();
 const dbConn  = require('../lib/db')
 
 //Si hacemos una request de tipo post a la dirección actual
 
-router.post('/',seguridad, function(req, res) {
+router.post('/', function(req, res) {
 
     let paquete = req.body.paquete
 
@@ -41,7 +40,7 @@ router.post('/',seguridad, function(req, res) {
   
 })
 
-router.post('/buscarPaquetes', seguridad, function(req, res) {
+router.post('/buscarPaquetes', function(req, res) {
 
   let consulta = req.body.consulta
 
@@ -58,7 +57,7 @@ router.post('/buscarPaquetes', seguridad, function(req, res) {
 
 })
 
-router.put('/:id', seguridad ,function(req, res) {
+router.put('/:id' ,function(req, res) {
 
   let idPaquete = Number(req.params.id)
   let estado = req.body.estado

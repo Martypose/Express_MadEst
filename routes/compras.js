@@ -1,6 +1,5 @@
 var express = require('express')
 var dbConn  = require('../lib/db')
-const seguridad = require('../lib/seguridad')
 var router = express.Router()
 
 /* GET compras page. */
@@ -31,7 +30,7 @@ router.get('/exito' , function(req, res, next) {
   res.render('avisoRecibido')
 });
 
-router.get('/avisos', seguridad ,function(req,res){
+router.get('/avisos', function(req,res){
 
   //En este caso según ->vista: (si la madera ha sido vista o no)
 
@@ -48,7 +47,7 @@ router.get('/avisos', seguridad ,function(req,res){
 })
 
 
-router.put(`/avisos/:id`, seguridad , (request, res) => {
+router.put(`/avisos/:id`, (request, res) => {
   let idAviso = Number(request.params.id);
 
   //Actualizar el aviso en la BD
@@ -65,7 +64,7 @@ router.put(`/avisos/:id`, seguridad , (request, res) => {
   
 });
 
-router.delete(`/avisos/:id`, seguridad, (request, res) => {
+router.delete(`/avisos/:id`, (request, res) => {
   const idAviso = Number(request.params.id);
 
   //Actualizar el aviso en la BD
