@@ -6,7 +6,8 @@
 
 var app = require('../app');
 var debug = require('debug')('madest:server');
-const http = require("http");
+const https = require("https");
+var fs = require('fs');
 /**
  * Get port from environment and store in Express.
  */
@@ -14,11 +15,19 @@ const http = require("http");
 var port = normalizePort(process.env.PORT || '8080');
 app.set('port', port);
 
+var options = {
+
+  key: fs.readFileSync('/etc/nginx/certificate/_.maderaexteriores.com_private_key.key'),
+  cert: fs.readFileSync('/etc/nginx/certificate/maderaexteriores.com_ssl_certificate.cer')
+
+
+}
+
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(options,app);
 
 /**
  * Listen on provided port, on all network interfaces.
