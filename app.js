@@ -2,7 +2,7 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const morganMiddleware = require("./lib/morgan.middleware");
 
 const cors = require('cors');
 
@@ -26,9 +26,8 @@ const verifyToken = require('./lib/validate-token');
 const app = express();
 
 
-//Aquí indicamos la configuración de nuestras views, en este caso Handlebars y automáticamente sabe que el layout base predefinido es layaout.hbs
-// view engine setup
-app.use(logger('dev'));
+//Aquí indicamos la configuración
+app.use(morganMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

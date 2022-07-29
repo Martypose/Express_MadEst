@@ -8,17 +8,18 @@ var app = require('../app');
 var debug = require('debug')('madest:server');
 const https = require("https");
 var fs = require('fs');
+require('dotenv').config();
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '8080');
+var port = normalizePort(process.env.PORT || '433');
 app.set('port', port);
 
 var options = {
 
-  key: fs.readFileSync('/etc/nginx/certificate/_.maderaexteriores.com_private_key.key'),
-  cert: fs.readFileSync('/etc/nginx/certificate/maderaexteriores.com_ssl_certificate.cer')
+  key: fs.readFileSync(`${process.env.PATH_KEY}`),
+  cert: fs.readFileSync(`${process.env.PATH_CER}`)
 
 
 }
