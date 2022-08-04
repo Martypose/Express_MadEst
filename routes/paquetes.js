@@ -5,11 +5,12 @@ const dbConn  = require('../lib/db')
 //Si hacemos una request de tipo post a la dirección actual
 
 router.post('/', function(req, res) {
+  console.log(req.body)
 
-    let paquete = req.body.paquete
+    let paquete = req.body
 
     //Guardar paquete en BD
-    dbConn.query('INSERT INTO paquete SET ID=?,fechaCreacion=?, estado=?, cantidades=?, cubico=?, numpiezas=?, medida=?, fechaBajado=?, fechaVenta=?', [0,paquete.fecha, paquete.estado,paquete.cantidades, paquete.cubico, paquete.numpiezas, paquete.medida,paquete.fechaBajado,paquete.fechaVenta], function(err, result) {
+    dbConn.query('INSERT INTO paquete SET ID=?,fechaCreacion=?, estado=?, cantidades=?, cubico=?, numpiezas=?, medida=?, fechaBajado=?, fechaVenta=?', [0,paquete.fechaCreacion, paquete.estado,paquete.cantidades, paquete.cubico, paquete.numpiezas, paquete.medida,paquete.fechaBajado,paquete.fechaVenta], function(err, result) {
         //if(err) throw err
         if (err) {
           console.log("Error en el insert "+ err.errno)
