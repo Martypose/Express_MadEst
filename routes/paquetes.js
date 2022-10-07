@@ -9,6 +9,7 @@ router.post('/', function(req, res) {
 
     let paquete = req.body
 
+    if(paquete.cantidades!==null)
     paquete.cantidades = paquete.cantidades.toString()
 
     //Guardar paquete en BD
