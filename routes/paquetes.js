@@ -12,6 +12,12 @@ router.post('/', function(req, res) {
     if(paquete.cantidades!==null)
     paquete.cantidades = paquete.cantidades.toString()
 
+    if(paquete.numpiezas==0)
+    paquete.numpiezas=null
+
+    if(paquete.cubico==0)
+    paquete.cubico=null
+
     //Guardar paquete en BD
     dbConn.query('INSERT INTO paquete SET ID=?,fechaCreacion=?, estado=?, cantidades=?, cubico=?, numpiezas=?, medida=?, fechaBajado=?, fechaVenta=?', [0,paquete.fechaCreacion, paquete.estado,paquete.cantidades, paquete.cubico, paquete.numpiezas, paquete.medida,paquete.fechaBajado,paquete.fechaVenta], function(err, result) {
         //if(err) throw err
