@@ -67,13 +67,13 @@ router.post('/buscarPaquetes', function(req, res) {
 
 })
 
-router.put('/:id' ,function(req, res) {
+router.put('/' ,function(req, res) {
 
-  let idPaquete = Number(req.params.id)
-  let estado = req.body.estado
+  let paquete = req.body  
+  console.log(paquete)
 
-  //Guardar paquete
-  dbConn.query('UPDATE paquete SET estado=? WHERE ID=?', [estado, idPaquete], function(err, result) {
+  //Actualizar el paquete
+  dbConn.query('UPDATE paquete SET medida=?, fechaVenta=?, fechaCreacion=?, fechaBajado=?, estado=?, cubico=?, cantidades=?, numpiezas=? WHERE ID=?', [paquete.medida, paquete.fechaVenta, paquete.fechaCreacion, paquete.fechaBajado, paquete.estado, paquete.cubico,paquete.cantidades, paquete.numpiezas, paquete.ID], function(err, result) {
       //if(err) throw err
       if (err) {
         console.log("Error en el update "+ err)
