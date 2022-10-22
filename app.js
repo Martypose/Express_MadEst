@@ -43,8 +43,8 @@ app.use('/contacto',verifyToken ,contactoRouter);
 app.use('/paquetes',verifyToken, paquetesRouter);
 app.use('/transporte',verifyToken ,transporteRouter);
 app.use('/login',loginRouter);
-app.use('/medidas',verifyToken,medidasRouter);
-app.use('/clientes',verifyToken,clientesRouter);
+app.use('/medidas',verifyToken, medidasRouter);
+app.use('/clientes',verifyToken, clientesRouter);
 app.use('/refreshtoken',refreshTokensRouter);
 
 

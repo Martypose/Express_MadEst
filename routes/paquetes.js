@@ -100,4 +100,17 @@ router.get('/', function(req,res){
     res.json(result);
   });
 })
+
+  router.delete('/:id',function(req,res){
+    console.log(`Intentando borrar ${req.params.id}`)
+
+    dbConn.query('DELETE FROM paquete WHERE id=?',[req.params.id], function (err, result) {
+      if (err) {
+        console.log('Error en el borrado'+ err)
+      }
+        //Enviar resultado en forma de JSON
+      res.send('Borrado correctamente');
+    });
+  })
+  
 module.exports = router
