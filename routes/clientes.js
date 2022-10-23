@@ -17,15 +17,20 @@ router.get('/', function(req,res){
 
 router.post('/',function(req,res){
   console.log("f")
+  console.log(req.body)
 
-  let cliente = req.body.cliente
+  let cliente = req.body
+  console.log(cliente)
 
-  dbConn.query(`Insert into cliente SET id=?, cif=?, nombre=?, direccion=?, telefono=?`,[Number(cliente.ID), cliente.cif, cliente.nombre, cliente.direccion, Number(cliente.telefono)], function (err, result) {
+  dbConn.query(`Insert into cliente SET cif=?, nombre=?, direccion=?, telefono=?`,[cliente.cif, cliente.nombre, cliente.direccion, Number(cliente.telefono)], function (err, result) {
     if (err) {
       console.log('Error en el insert:'+ err)
-    }
+      res.status(222).send('Error insert')
+    }else{
       //Enviar resultado en forma de JSON
     res.send('Se ha insertado correctamente');
+    }
+      
   });
 
 })
