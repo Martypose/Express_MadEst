@@ -16,9 +16,6 @@ router.get('/', function(req,res){
 })
 
 router.post('/',function(req,res){
-  console.log("f")
-  console.log(req.body)
-
   let cliente = req.body
   console.log(cliente)
 
@@ -32,6 +29,40 @@ router.post('/',function(req,res){
     }
       
   });
+
+})
+
+router.delete('/:cif',function(req,res){
+  console.log(`Intentando borrar ${req.params.id}`)
+
+  dbConn.query('DELETE FROM cliente WHERE cif=?',[req.params.cif], function (err, result) {
+    if (err) {
+      console.log('Error en el borrado'+ err)
+    }
+      //Enviar resultado en forma de JSON
+    res.send('Borrado correctamente');
+  });
+})
+
+router.put('/' ,function(req, res) {
+
+  let cliente = req.body  
+  console.log(cliente)
+
+  //Actualizar el cliente
+  dbConn.query('UPDATE cliente SET nombre=?, direccion=?, telefono=? WHERE cif=?', [cliente.nombre, cliente.direccion, cliente.telefono, cliente.cif], function(err, result) {
+      //if(err) throw err
+      if (err) {
+        console.log("Error en el update "+ err)
+        res.send('Error '+err.message);
+      } else {
+          //mostrar mensaje éxito
+          console.log('exito al guardar en bd');
+          res.send('Actualizado con éxito.');
+      }
+    })
+
+  
 
 })
 
