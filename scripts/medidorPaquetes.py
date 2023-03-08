@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 # Lee la imagen de entrada
-img = cv.imread('imagen.jpg', cv.IMREAD_GRAYSCALE)
+img = cv.imread('tablas.png', cv.IMREAD_GRAYSCALE)
 
 # Aplica la binarización gaussiana
 img_gaussian = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)

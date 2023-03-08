@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 # Lee la imagen de entrada
-img = cv.imread('tablas.jpg', cv.IMREAD_GRAYSCALE)
+img = cv.imread('tablas.png', cv.IMREAD_GRAYSCALE)
 
 
 # Definir las coordenadas de los cuatro puntos de la región de interés (ROI)
@@ -32,14 +32,14 @@ img_gaussian = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.
 cv.imwrite('binarizacionGaussiana.jpg', img_gaussian)
 
 
-kernel = np.ones((1,10), np.uint8)
+kernel = np.ones((9,1), np.uint8)
 
-morfo = cv.morphologyEx(img_gaussian, cv.MORPH_OPEN, kernel, iterations=3)
+morfo = cv.morphologyEx(img_gaussian, cv.MORPH_OPEN, kernel, iterations=1)
 cv.imwrite('open.jpg', morfo)
 
-kernel = np.ones((1,9), np.uint8)
+kernel = np.ones((9,1), np.uint8)
 
-morfo = cv.morphologyEx(img_gaussian, cv.MORPH_CLOSE, kernel, iterations=15)
+morfo = cv.morphologyEx(img_gaussian, cv.MORPH_CLOSE, kernel, iterations=1)
 
 
 cv.imwrite('close.jpg', morfo)
