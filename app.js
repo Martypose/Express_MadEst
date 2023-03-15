@@ -3,6 +3,10 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const morganMiddleware = require("./lib/morgan.middleware");
+// Importa Socket.IO y crea el servidor HTTP
+const http = require('http');
+const socketIO = require('socket.io');
+
 
 const cors = require('cors');
 
@@ -25,6 +29,27 @@ const verifyToken = require('./lib/validate-token');
 
 
 const app = express();
+
+
+const ioClient = require('socket.io-client');
+
+// Conéctate a la aplicación Flask en la Raspberry Pi (reemplaza 'http://raspberry_pi_IP:port' con la IP y el puerto reales)
+const socket = ioClient('http://127.0.0.1:5000');
+
+// Suscríbete a los eventos emitidos por la aplicación Flask
+socket.on('connect', () => {
+  console.log('Conectado a la aplicación Flask en la Raspberry Pi');
+});
+
+socket.on('disconnect', () => {
+  console.log('Desconectado de la aplicación Flask en la Raspberry Pi');
+});
+
+// Evento personalizado (reemplaza 'my_event' con el nombre real del evento)
+socket.on('my_event', (data) => {
+  console.log('Datos recibidos desde la aplicación Flask:', data);
+});
+
 
 
 //Aquí indicamos la configuración
@@ -54,6 +79,8 @@ app.use('/refreshtoken',refreshTokensRouter);
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function(err, req, res, next) {

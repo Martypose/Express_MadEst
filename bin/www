@@ -3,8 +3,7 @@
 /**
  * Module dependencies.
  */
-
-var app = require('../app');
+const app = require('../app');
 var debug = require('debug')('madest:server');
 const https = require("https");
 var fs = require('fs');
