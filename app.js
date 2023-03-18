@@ -70,7 +70,6 @@ const rutasSocket = require('./socket_routes/socket_handlers');
 // Inicia las rutas de Socket.IO con la instancia de socket.io
 rutasSocket(io);
 
-console.log(`Socket.IO server listening on http://localhost:${server.address().port}`);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
