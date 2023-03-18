@@ -3,42 +3,37 @@
 /**
  * Module dependencies.
  */
-const app = require('../app');
-var debug = require('debug')('madest:server');
+const { app, server } = require('../app');
+const debug = require('debug')('madest:server');
 const https = require("https");
-var fs = require('fs');
+const fs = require('fs');
 require('dotenv').config();
+
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '433');
+const port = normalizePort(process.env.PORT || '443');
 app.set('port', port);
 
-var options = {
-
+const options = {
   key: fs.readFileSync(`${process.env.PATH_KEY}`),
   cert: fs.readFileSync(`${process.env.PATH_CER}`)
-
-}
+};
 
 /**
  * Create HTTPS server.
  */
 
-var server = https.createServer(options, app);
-
-//  
-
-const { Server } = require("socket.io");
+const httpsServer = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port, '0.0.0.0');
-server.on('error', onError);
-server.on('listening', onListening);
+httpsServer.listen(port, '0.0.0.0');
+httpsServer.on('error', onError);
+httpsServer.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
