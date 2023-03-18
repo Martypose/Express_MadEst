@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const morganMiddleware = require("./lib/morgan.middleware");
 // Importa Socket.IO y crea el servidor HTTP
 const http = require('http');
-const {Server} = require('socket.io');
+
 
 const cors = require('cors');
 
@@ -31,8 +31,6 @@ const app = express();
 // Crear el servidor HTTP utilizando la aplicación Express
 const server = http.createServer(app);
 
-// Crear la instancia de socket.io utilizando el servidor HTTP
-const io = new Server(server);
 
 // Configuración de Server HTTP
 app.use(morganMiddleware);
@@ -64,6 +62,7 @@ const rutasSocket = require('./socket_routes/socket_handlers');
 
 // Inicia las rutas de Socket.IO con la instancia de socket.io
 rutasSocket(io);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
