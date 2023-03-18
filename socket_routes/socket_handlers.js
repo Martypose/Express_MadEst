@@ -1,8 +1,6 @@
 // socket_handlers.js
 
 module.exports = function (io) {
-
-  io.set('log level', 1);
   // Crear un namespace específico para la API
   const apiNamespace = io.of('/api');
 
