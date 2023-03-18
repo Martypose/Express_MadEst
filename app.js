@@ -35,8 +35,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Crear la instancia de socket.io utilizando el servidor HTTP
-const io = socketIO(server);
-
+const io = new Server(server);
 
 // Somos el servidor HTTP, se conectan a nosotros tanto por HTTP como por Socket.IO
 
