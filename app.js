@@ -7,10 +7,9 @@ const morganMiddleware = require("./lib/morgan.middleware");
 const http = require('http');
 const {Server} = require('socket.io');
 
-
 const cors = require('cors');
 
-//Importamos rutas
+// Importamos rutas
 const indexRouter = require('./routes/index');
 const empresaRouter = require('./routes/empresa');
 const productosRouter = require('./routes/productos');
@@ -24,10 +23,8 @@ const clientesRouter = require('./routes/clientes');
 const preciosmaderaRoute = require('./routes/clientes');
 const refreshTokensRouter = require('./routes/preciosmadera');
 
-
-//Seguridad, pedit token para acceder a las rutas
+// Seguridad, pedir token para acceder a las rutas
 const verifyToken = require('./lib/validate-token');
-
 
 const app = express();
 
@@ -36,8 +33,6 @@ const server = http.createServer(app);
 
 // Crear la instancia de socket.io utilizando el servidor HTTP
 const io = new Server(server);
-
-// Somos el servidor HTTP, se conectan a nosotros tanto por HTTP como por Socket.IO
 
 // Configuración de Server HTTP
 app.use(morganMiddleware);
@@ -49,19 +44,20 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://www.maderaexteriores.com'],
   credentials: true,
 }));
-//Rutas de la API HTTP
+
+// Rutas de la API HTTP
 app.use('/', indexRouter);
-app.use('/empresa',verifyToken, empresaRouter);
-app.use('/productos',verifyToken, productosRouter);
-app.use('/compras',verifyToken, comprasRouter);
-app.use('/contacto',verifyToken ,contactoRouter);
-app.use('/paquetes',verifyToken, paquetesRouter);
-app.use('/transporte',verifyToken ,transporteRouter);
-app.use('/login',loginRouter);
-app.use('/medidas',verifyToken, medidasRouter);
-app.use('/clientes',verifyToken, clientesRouter);
-app.use('/preciosmadera',verifyToken,preciosmaderaRoute);
-app.use('/refreshtoken',refreshTokensRouter);
+app.use('/empresa', verifyToken, empresaRouter);
+app.use('/productos', verifyToken, productosRouter);
+app.use('/compras', verifyToken, comprasRouter);
+app.use('/contacto', verifyToken, contactoRouter);
+app.use('/paquetes', verifyToken, paquetesRouter);
+app.use('/transporte', verifyToken, transporteRouter);
+app.use('/login', loginRouter);
+app.use('/medidas', verifyToken, medidasRouter);
+app.use('/clientes', verifyToken, clientesRouter);
+app.use('/preciosmadera', verifyToken, preciosmaderaRoute);
+app.use('/refreshtoken', refreshTokensRouter);
 
 // Las rutas de Socket.IO
 const rutasSocket = require('./socket_routes/socket_handlers');
@@ -70,14 +66,12 @@ const rutasSocket = require('./socket_routes/socket_handlers');
 rutasSocket(io);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
-
-
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -86,4 +80,4 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
 });
 
-module.exports = app;
+module.exports = { app, server };
