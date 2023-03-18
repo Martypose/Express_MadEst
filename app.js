@@ -69,12 +69,6 @@ const rutasSocket = require('./socket_routes/socket_handlers');
 // Inicia las rutas de Socket.IO con la instancia de socket.io
 rutasSocket(io);
 
-const socket = io('https://www.maderaexteriores.com/api');
-
-socket.on('evento', (data) => {
-  console.log(data);
-});
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
