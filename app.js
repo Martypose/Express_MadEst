@@ -61,7 +61,6 @@ app.use('/refreshtoken', refreshTokensRouter);
 const rutasSocket = require('./socket_routes/socket_handlers');
 
 // Inicia las rutas de Socket.IO con la instancia de socket.io
-rutasSocket(io);
 
 
 // catch 404 and forward to error handler
