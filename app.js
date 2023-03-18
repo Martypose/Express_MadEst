@@ -4,7 +4,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const morganMiddleware = require("./lib/morgan.middleware");
 // Importa Socket.IO y crea el servidor HTTP
-const http = require('http');
 
 
 const cors = require('cors');
