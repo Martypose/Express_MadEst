@@ -6,7 +6,6 @@ const morganMiddleware = require("./lib/morgan.middleware");
 // Importa Socket.IO y crea el servidor HTTP
 const http = require('http');
 const socketIO = require('socket.io');
-const ioClient = require('socket.io-client');
 
 
 const cors = require('cors');
@@ -71,7 +70,7 @@ const rutasSocket = require('./socket_routes/socket_handlers');
 // Inicia las rutas de Socket.IO con la instancia de socket.io
 rutasSocket(io);
 
-
+onsole.log(`Socket.IO server listening on http://localhost:${server.address().port}`);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
