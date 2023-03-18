@@ -10,6 +10,7 @@ const tokenList = {}
 //logear usuario
 router.post('/', async function(req, res) {
   
+  console.log('hola')
     const username = req.body.name
     const password = req.body.password
 

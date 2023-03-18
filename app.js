@@ -6,6 +6,7 @@ const morganMiddleware = require("./lib/morgan.middleware");
 // Importa Socket.IO y crea el servidor HTTP
 const http = require('http');
 const socketIO = require('socket.io');
+const ioClient = require('socket.io-client');
 
 
 const cors = require('cors');
@@ -24,43 +25,33 @@ const clientesRouter = require('./routes/clientes');
 const preciosmaderaRoute = require('./routes/clientes');
 const refreshTokensRouter = require('./routes/preciosmadera');
 
+
 //Seguridad, pedit token para acceder a las rutas
 const verifyToken = require('./lib/validate-token');
 
 
 const app = express();
 
+// Crear el servidor HTTP utilizando la aplicación Express
+const server = http.createServer(app);
 
-const ioClient = require('socket.io-client');
-
-// Conéctate a la aplicación Flask en la Raspberry Pi (reemplaza 'http://raspberry_pi_IP:port' con la IP y el puerto reales)
-const socket = ioClient('http://127.0.0.1:5000');
-
-// Suscríbete a los eventos emitidos por la aplicación Flask
-socket.on('connect', () => {
-  console.log('Conectado a la aplicación Flask en la Raspberry Pi');
-});
-
-socket.on('disconnect', () => {
-  console.log('Desconectado de la aplicación Flask en la Raspberry Pi');
-});
-
-// Evento personalizado (reemplaza 'my_event' con el nombre real del evento)
-socket.on('my_event', (data) => {
-  console.log('Datos recibidos desde la aplicación Flask:', data);
-});
+// Crear la instancia de socket.io utilizando el servidor HTTP
+const io = socketIO(server);
 
 
+// Somos el servidor HTTP, se conectan a nosotros tanto por HTTP como por Socket.IO
 
-//Aquí indicamos la configuración
+// Configuración de Server HTTP
 app.use(morganMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
-
-//Rutas que usamos, y que acontece en cada una está dentro de cada archivo
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
+//Rutas de la API HTTP
 app.use('/', indexRouter);
 app.use('/empresa',verifyToken, empresaRouter);
 app.use('/productos',verifyToken, productosRouter);
@@ -73,6 +64,12 @@ app.use('/medidas',verifyToken, medidasRouter);
 app.use('/clientes',verifyToken, clientesRouter);
 app.use('/preciosmadera',verifyToken,preciosmaderaRoute);
 app.use('/refreshtoken',refreshTokensRouter);
+
+// Las rutas de Socket.IO
+const rutasSocket = require('./socket_routes/socket_handlers');
+
+// Inicia las rutas de Socket.IO con la instancia de socket.io
+rutasSocket(io);
 
 
 // catch 404 and forward to error handler
