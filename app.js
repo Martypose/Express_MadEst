@@ -27,9 +27,6 @@ const verifyToken = require('./lib/validate-token');
 
 const app = express();
 
-// Crear el servidor HTTP utilizando la aplicación Express
-const server = http.createServer(app);
-
 
 // Configuración de Server HTTP
 app.use(morganMiddleware);
@@ -77,4 +74,4 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
 });
 
-module.exports = { app, server };
+module.exports = { app};
