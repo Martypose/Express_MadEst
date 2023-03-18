@@ -2,10 +2,9 @@
 
 module.exports = function (io) {
   // Crear un namespace específico para la API
-  const apiNamespace = io.of('/api');
 
   // Maneja la conexión de un cliente (Raspberry Pi) en el namespace de la API
-  apiNamespace.on("connection", (socket) => {
+  io.on("connection", (socket) => {
     // Registra la IP del cliente y la hora de conexión
     const clientIp = socket.handshake.address;
     const connectionTime = new Date().toLocaleString();
