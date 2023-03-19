@@ -3,9 +3,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const morganMiddleware = require("./lib/morgan.middleware");
-// Importa Socket.IO y crea el servidor HTTP
-
-
 const cors = require('cors');
 
 // Importamos rutas
@@ -19,13 +16,14 @@ const transporteRouter = require('./routes/transporte');
 const loginRouter = require('./routes/login');
 const medidasRouter = require('./routes/medidas');
 const clientesRouter = require('./routes/clientes');
-const preciosmaderaRoute = require('./routes/clientes');
-const refreshTokensRouter = require('./routes/preciosmadera');
+const preciosmaderaRoute = require('./routes/preciosmadera');
+const refreshTokensRouter = require('./routes/refreshToken');
 
 // Seguridad, pedir token para acceder a las rutas
 const verifyToken = require('./lib/validate-token');
 
 const app = express();
+
 
 
 // Configuración de Server HTTP
@@ -52,11 +50,6 @@ app.use('/medidas', verifyToken, medidasRouter);
 app.use('/clientes', verifyToken, clientesRouter);
 app.use('/preciosmadera', verifyToken, preciosmaderaRoute);
 app.use('/refreshtoken', refreshTokensRouter);
-
-// Las rutas de Socket.IO
-const rutasSocket = require('./socket_routes/socket_handlers');
-
-// Inicia las rutas de Socket.IO con la instancia de socket.io
 
 
 // catch 404 and forward to error handler
