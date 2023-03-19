@@ -3,16 +3,17 @@
 /**
  * Module dependencies.
  */
-const { app} = require('../app');
-const debug = require('debug')('madest:server');
+const { app } = require("../app");
+const debug = require("debug")("madest:server");
 const https = require("https");
-const {Server} = require('socket.io');
-const fs = require('fs');
-require('dotenv').config();
-
+const fs = require("fs");
+require("dotenv").config();
 /**
  * Get port from environment and store in Express.
  */
+
+// Importa la configuración de Socket.IO
+const createSocket = require("../lib/socket");
 
 const port = normalizePort(process.env.PORT || '443');
 app.set('port', port);
@@ -28,7 +29,7 @@ const options = {
 
 const httpsServer = https.createServer(options, app);
 
-const io = new Server(httpsServer);
+const io = createSocket(httpsServer);
 /**
  * Listen on provided port, on all network interfaces.
  */

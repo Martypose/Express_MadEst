@@ -1,11 +1,21 @@
 import cv2 as cv
 import numpy as np
+import threading
+import time
+import psutil
+import logging
+
 from flask import Flask
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
-socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Configura el nivel de registro para la aplicación Flask
+log = logging.getLogger("werkzeug")
+log.setLevel(logging.WARNING)
+
+socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
 
 @socketio.on("connect")
 def handle_connect():
@@ -18,6 +28,14 @@ def handle_disconnect():
 def enviar_medidas(medidas):
     socketio.emit("medidas", medidas)
 
+def enviar_estadisticas():
+    while True:
+        cpu_percent = psutil.cpu_percent()
+        memory = psutil.virtual_memory().percent
+        stats = {"cpu_percent": cpu_percent, "memory_percent": memory}
+        socketio.emit("estadisticas", stats)
+        time.sleep(1)
+
 def procesar_video(captura):
     while True:
         ret, frame = captura.read()
@@ -25,7 +43,7 @@ def procesar_video(captura):
             break
 
         contornos = detectar_objetos(frame)
-        guardar_medidas(contornos)
+        guardar_medidas(contornos, frame)
 
         cv.imshow("Resultado", frame)
 
@@ -54,7 +72,7 @@ def detectar_objetos(imagen):
     cnts, _ = cv.findContours(opening, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     return cnts
 
-def guardar_medidas(contornos):
+def guardar_medidas(contornos,imagen):
     medidas = []
 
     for c in contornos:
@@ -63,7 +81,12 @@ def guardar_medidas(contornos):
         aspect_ratio = float(w) / h
 
         if aspect_ratio > 3 and 100 < h < 200 and x > 200:
+            rect = cv.minAreaRect(c)
+            box = cv.boxPoints(rect)
+            box = np.intp(box)
+            cv.drawContours(imagen,[box],0,(24,255,12),3)
             medidas.append((x, y, w, h))
+    cv.imshow("Resultado", imagen)
 
     enviar_medidas(medidas)
 
@@ -71,13 +94,24 @@ def main():
     captura = cv.VideoCapture(0)
     if not captura.isOpened():
         print("Error al abrir la cámara.")
+        time.sleep(2)  # Agrega un retardo de 2 segundos
         return
 
     try:
-        procesar_video(captura)
+        # Inicia el hilo de procesamiento de video
+        video_thread = threading.Thread(target=procesar_video, args=(captura,))
+        video_thread.start()
+
+        # Inicia el hilo de envío de estadísticas
+        stats_thread = threading.Thread(target=enviar_estadisticas)
+        stats_thread.start()
+
+        # Ejecuta la aplicación Flask-SocketIO en el hilo principal
+        socketio.run(app, host="0.0.0.0", port=5000)
+
     finally:
         captura.release()
         cv.destroyAllWindows()
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000)
+    main()
