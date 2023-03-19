@@ -33,15 +33,6 @@ const io = createSocket(httpsServer);
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-
-io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado!"+ socket.id);
-});
-
-const rutasSocket = require('../socket_routes/socket_handlers');
-rutasSocket(io);
-
 httpsServer.listen(port, '0.0.0.0');
 httpsServer.on('error', onError);
 httpsServer.on('listening', onListening);
