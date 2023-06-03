@@ -18,7 +18,7 @@ const medidasRouter = require('./routes/medidas');
 const clientesRouter = require('./routes/clientes');
 const preciosmaderaRoute = require('./routes/preciosmadera');
 const refreshTokensRouter = require('./routes/refreshToken');
-
+const tablasdetectadasRoute = require('./routes/tablasdetectadas');
 // Seguridad, pedir token para acceder a las rutas
 const verifyToken = require('./lib/validate-token');
 
@@ -49,6 +49,7 @@ app.use('/login', loginRouter);
 app.use('/medidas', verifyToken, medidasRouter);
 app.use('/clientes', verifyToken, clientesRouter);
 app.use('/preciosmadera', verifyToken, preciosmaderaRoute);
+app.use('/tablasdetectadas', verifyToken, tablasdetectadasRoute);
 app.use('/refreshtoken', refreshTokensRouter);
 
 
