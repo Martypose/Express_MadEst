@@ -19,6 +19,8 @@ const clientesRouter = require('./routes/clientes');
 const preciosmaderaRoute = require('./routes/preciosmadera');
 const refreshTokensRouter = require('./routes/refreshToken');
 const tablasdetectadasRoute = require('./routes/tablasdetectadas');
+const estadisticasRoute = require('./routes/estadisticas');
+const medidastablasRoute = require('./routes/medidastablas');
 // Seguridad, pedir token para acceder a las rutas
 const verifyToken = require('./lib/validate-token');
 
@@ -50,7 +52,11 @@ app.use('/medidas', verifyToken, medidasRouter);
 app.use('/clientes', verifyToken, clientesRouter);
 app.use('/preciosmadera', verifyToken, preciosmaderaRoute);
 app.use('/tablasdetectadas', verifyToken, tablasdetectadasRoute);
+app.use('/medidastablas', verifyToken, medidastablasRoute);
+app.use('/estadisticas',verifyToken, estadisticasRoute);
 app.use('/refreshtoken', refreshTokensRouter);
+
+
 
 
 // catch 404 and forward to error handler
