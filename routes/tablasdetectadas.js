@@ -113,4 +113,52 @@ router.put('/', function(req, res) {
   });
 })
 
+router.get('/cubico-por-fecha', function(req, res) {
+  const { startDate, endDate, agrupamiento } = req.query;
+
+  let intervalo;
+  switch (agrupamiento) {
+    case 'hora':
+      intervalo = 'HOUR';
+      break;
+    case 'dia':
+      intervalo = 'DAY';
+      break;
+    case 'semana':
+      intervalo = 'WEEK';
+      break;
+    case 'mes':
+      intervalo = 'MONTH';
+      break;
+    case 'año':
+      intervalo = 'YEAR';
+      break;
+    default:
+      return res.status(400).send('Agrupamiento no válido');
+  }
+
+  let query = `
+    SELECT 
+      DATE_FORMAT(t.fecha, '%Y-%m-%d %H:%i:%s') as fecha,
+      SUM(m.ancho * m.grosor * m.largo) as volumen_cubico
+    FROM 
+      tabla_detectada t 
+    JOIN 
+      medidas_tablas m ON t.id_medida_ideal = m.id
+    WHERE 
+      t.fecha BETWEEN ? AND ?
+    GROUP BY 
+      DATE_FORMAT(t.fecha, CONCAT('%Y-%m-', ?, ' %H:%i:%s'));
+  `;
+
+  dbConn.query(query, [startDate, endDate, intervalo], function(err, result) {
+    if (err) {
+      console.log('Error en la consulta a la BD: ' + err);
+      res.status(500).send('Error en la consulta a la BD');
+    }
+    // Enviar resultado en forma de JSON
+    res.json(result);
+  });
+})
+
 module.exports = router;
