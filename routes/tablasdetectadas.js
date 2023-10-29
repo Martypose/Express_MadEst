@@ -117,21 +117,27 @@ router.get('/cubico-por-fecha', function(req, res) {
   const { startDate, endDate, agrupamiento } = req.query;
 
   let intervalo;
+  let formatoFecha;
   switch (agrupamiento) {
     case 'hora':
       intervalo = 'HOUR';
+      formatoFecha = "%Y-%m-%d %H";
       break;
     case 'dia':
       intervalo = 'DAY';
+      formatoFecha = "%Y-%m-%d";
       break;
     case 'semana':
       intervalo = 'WEEK';
+      formatoFecha = "%Y-%u";
       break;
     case 'mes':
       intervalo = 'MONTH';
+      formatoFecha = "%Y-%m";
       break;
     case 'año':
       intervalo = 'YEAR';
+      formatoFecha = "%Y";
       break;
     default:
       return res.status(400).send('Agrupamiento no válido');
@@ -139,8 +145,9 @@ router.get('/cubico-por-fecha', function(req, res) {
 
   let query = `
     SELECT 
-      DATE_FORMAT(t.fecha, '%Y-%m-%d %H:%i:%s') as fecha,
-      SUM(m.ancho * m.grosor * m.largo) as volumen_cubico
+      DATE_FORMAT(t.fecha, ?) as fecha,
+      SUM((m.ancho * m.grosor * m.largo) / 1000000000) as volumen_cubico
+
     FROM 
       tabla_detectada t 
     JOIN 
@@ -148,10 +155,10 @@ router.get('/cubico-por-fecha', function(req, res) {
     WHERE 
       t.fecha BETWEEN ? AND ?
     GROUP BY 
-      DATE_FORMAT(t.fecha, CONCAT('%Y-%m-', ?, ' %H:%i:%s'));
+      DATE_FORMAT(t.fecha, ?);
   `;
 
-  dbConn.query(query, [startDate, endDate, intervalo], function(err, result) {
+  dbConn.query(query, [formatoFecha, startDate, endDate, formatoFecha], function(err, result) {
     if (err) {
       console.log('Error en la consulta a la BD: ' + err);
       res.status(500).send('Error en la consulta a la BD');
@@ -159,6 +166,6 @@ router.get('/cubico-por-fecha', function(req, res) {
     // Enviar resultado en forma de JSON
     res.json(result);
   });
-})
+});
 
 module.exports = router;
