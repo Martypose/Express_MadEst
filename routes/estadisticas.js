@@ -17,7 +17,7 @@ router.get("/", function (req, res) {
     query += " WHERE fecha BETWEEN ? AND ?";
     queryParams.push(fromDate, toDate);
   }
-
+  query += " ORDER BY fecha DESC";
   query += " LIMIT ? OFFSET ?";
   queryParams.push(limit, offset);
 
