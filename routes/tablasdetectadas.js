@@ -137,6 +137,10 @@ router.get("/cubico-por-fecha", function (req, res) {
 
   let formatoFecha;
   switch (agrupamiento) {
+    case "minuto":
+      intervalo = "MINUTE";
+      formatoFecha = "%Y-%m-%d %H:%i";
+      break;
     case "hora":
       intervalo = "HOUR";
       formatoFecha = "%Y-%m-%d %H";
@@ -195,6 +199,10 @@ router.get("/tablas-por-medida-y-fecha", function (req, res) {
 
   let formatoFecha;
   switch (agrupamiento) {
+    case "minuto":
+      intervalo = "MINUTE";
+      formatoFecha = "%Y-%m-%d %H:%i";
+      break;
     case "hora":
       intervalo = "HOUR";
       formatoFecha = "%Y-%m-%d %H";
