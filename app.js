@@ -5,18 +5,7 @@ const cookieParser = require('cookie-parser');
 const morganMiddleware = require("./lib/morgan.middleware");
 const cors = require('cors');
 
-// Importamos rutas
-const indexRouter = require('./routes/index');
-const empresaRouter = require('./routes/empresa');
-const productosRouter = require('./routes/productos');
-const comprasRouter = require('./routes/compras');
-const contactoRouter = require('./routes/contacto');
-const paquetesRouter = require('./routes/paquetes');
-const transporteRouter = require('./routes/transporte');
 const loginRouter = require('./routes/login');
-const medidasRouter = require('./routes/medidas');
-const clientesRouter = require('./routes/clientes');
-const preciosmaderaRoute = require('./routes/preciosmadera');
 const refreshTokensRouter = require('./routes/refreshToken');
 const tablasdetectadasRoute = require('./routes/tablasdetectadas');
 const estadisticasRoute = require('./routes/estadisticas');
@@ -40,17 +29,7 @@ app.use(cors({
 }));
 
 // Rutas de la API HTTP
-app.use('/', indexRouter);
-app.use('/empresa', verifyToken, empresaRouter);
-app.use('/productos', verifyToken, productosRouter);
-app.use('/compras', verifyToken, comprasRouter);
-app.use('/contacto', verifyToken, contactoRouter);
-app.use('/paquetes', verifyToken, paquetesRouter);
-app.use('/transporte', verifyToken, transporteRouter);
 app.use('/login', loginRouter);
-app.use('/medidas', verifyToken, medidasRouter);
-app.use('/clientes', verifyToken, clientesRouter);
-app.use('/preciosmadera', verifyToken, preciosmaderaRoute);
 app.use('/tablasdetectadas', verifyToken, tablasdetectadasRoute);
 app.use('/medidastablas', verifyToken, medidastablasRoute);
 app.use('/estadisticas',verifyToken, estadisticasRoute);
