@@ -138,27 +138,21 @@ router.get("/cubico-por-fecha", function (req, res) {
   let formatoFecha;
   switch (agrupamiento) {
     case "minuto":
-      intervalo = "MINUTE";
       formatoFecha = "%Y-%m-%d %H:%i";
       break;
     case "hora":
-      intervalo = "HOUR";
       formatoFecha = "%Y-%m-%d %H";
       break;
     case "dia":
-      intervalo = "DAY";
       formatoFecha = "%Y-%m-%d";
       break;
     case "semana":
-      intervalo = "WEEK";
       formatoFecha = "%Y-%u";
       break;
     case "mes":
-      intervalo = "MONTH";
       formatoFecha = "%Y-%m";
       break;
     case "año":
-      intervalo = "YEAR";
       formatoFecha = "%Y";
       break;
     default:
@@ -169,8 +163,7 @@ router.get("/cubico-por-fecha", function (req, res) {
     SELECT 
       DATE_FORMAT(t.fecha, ?) as fecha,
       m.grosor,
-      SUM((m.ancho * m.grosor * m.largo) / 1000000000) as volumen_cubico,
-      (SUM((m.ancho * m.grosor * m.largo) / 1000000000) / (SELECT SUM((mi.ancho * mi.grosor * mi.largo) / 1000000000) FROM tabla_detectada ti JOIN medidas_tablas mi ON ti.id_medida_ideal = mi.id WHERE ti.fecha BETWEEN ? AND ?)) * 100 as porcentaje_grosor
+      SUM((m.ancho * m.grosor * m.largo) / 1000000000) as volumen_cubico
     FROM 
       tabla_detectada t 
     JOIN 
@@ -183,13 +176,12 @@ router.get("/cubico-por-fecha", function (req, res) {
 
   dbConn.query(
     query,
-    [formatoFecha, startDate, endDate, startDate, endDate, formatoFecha],
+    [formatoFecha, startDate, endDate, formatoFecha],
     function (err, result) {
       if (err) {
         console.log("Error en la consulta a la BD: " + err);
         res.status(500).send("Error en la consulta a la BD");
       }
-      // Enviar resultado en forma de JSON
       res.json(result);
     }
   );
@@ -243,61 +235,6 @@ WHERE
   t.fecha BETWEEN ? AND ?
 GROUP BY 
   DATE_FORMAT(t.fecha, ?), m.id, m.ancho, m.grosor;
-  `;
-
-  dbConn.query(
-    query,
-    [formatoFecha, startDate, endDate, formatoFecha],
-    function (err, result) {
-      if (err) {
-        console.log("Error en la consulta a la BD: " + err);
-        res.status(500).send("Error en la consulta a la BD");
-      }
-      res.json(result);
-    }
-  );
-});
-
-router.get("/volumen-por-grosor", function (req, res) {
-  const { startDate, endDate, agrupamiento } = req.query;
-
-  let formatoFecha;
-  switch (agrupamiento) {
-    case "minuto":
-      formatoFecha = "%Y-%m-%d %H:%i";
-      break;
-    case "hora":
-      formatoFecha = "%Y-%m-%d %H";
-      break;
-    case "dia":
-      formatoFecha = "%Y-%m-%d";
-      break;
-    case "semana":
-      formatoFecha = "%Y-%u";
-      break;
-    case "mes":
-      formatoFecha = "%Y-%m";
-      break;
-    case "año":
-      formatoFecha = "%Y";
-      break;
-    default:
-      return res.status(400).send("Agrupamiento no válido");
-  }
-
-  let query = `
-    SELECT 
-      DATE_FORMAT(t.fecha, ?) as fecha,
-      m.grosor,
-      SUM((m.ancho * m.grosor * m.largo) / 1000000000) as volumen_cubico
-    FROM 
-      tabla_detectada t 
-    JOIN 
-      medidas_tablas m ON t.id_medida_ideal = m.id
-    WHERE 
-      t.fecha BETWEEN ? AND ?
-    GROUP BY 
-      DATE_FORMAT(t.fecha, ?), m.grosor;
   `;
 
   dbConn.query(
