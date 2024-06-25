@@ -138,27 +138,21 @@ router.get("/cubico-por-fecha", function (req, res) {
   let formatoFecha;
   switch (agrupamiento) {
     case "minuto":
-      intervalo = "MINUTE";
       formatoFecha = "%Y-%m-%d %H:%i";
       break;
     case "hora":
-      intervalo = "HOUR";
       formatoFecha = "%Y-%m-%d %H";
       break;
     case "dia":
-      intervalo = "DAY";
       formatoFecha = "%Y-%m-%d";
       break;
     case "semana":
-      intervalo = "WEEK";
       formatoFecha = "%Y-%u";
       break;
     case "mes":
-      intervalo = "MONTH";
       formatoFecha = "%Y-%m";
       break;
     case "año":
-      intervalo = "YEAR";
       formatoFecha = "%Y";
       break;
     default:
@@ -168,8 +162,8 @@ router.get("/cubico-por-fecha", function (req, res) {
   let query = `
     SELECT 
       DATE_FORMAT(t.fecha, ?) as fecha,
+      m.grosor,
       SUM((m.ancho * m.grosor * m.largo) / 1000000000) as volumen_cubico
-
     FROM 
       tabla_detectada t 
     JOIN 
@@ -177,7 +171,7 @@ router.get("/cubico-por-fecha", function (req, res) {
     WHERE 
       t.fecha BETWEEN ? AND ?
     GROUP BY 
-      DATE_FORMAT(t.fecha, ?);
+      DATE_FORMAT(t.fecha, ?), m.grosor;
   `;
 
   dbConn.query(
@@ -188,7 +182,6 @@ router.get("/cubico-por-fecha", function (req, res) {
         console.log("Error en la consulta a la BD: " + err);
         res.status(500).send("Error en la consulta a la BD");
       }
-      // Enviar resultado en forma de JSON
       res.json(result);
     }
   );
