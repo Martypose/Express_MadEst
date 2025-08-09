@@ -33,42 +33,51 @@ router.get('/por-fechas', async (req, res) => {
 });
 
 // === NUEVO === Cubicaje por fecha y grosor real (tabla medidas_cenital)
-router.get('/cubico-por-fecha', async (req, res) => {
-  try {
-    const { startDate, endDate, agrupamiento = 'dia' } = req.query;
+router.get("/cubico-por-fecha", async function (req, res) {
+  const { startDate, endDate, agrupamiento } = req.query;
+  if (!startDate || !endDate) {
+    return res.status(400).send("startDate y endDate son obligatorios");
+  }
 
-    const fmt = {
-      minuto: '%Y-%m-%d %H:%i',
-      hora:   '%Y-%m-%d %H',
-      dia:    '%Y-%m-%d',
-      semana: '%Y-%u',
-      mes:    '%Y-%m',
-      año:    '%Y',
-    }[agrupamiento];
+  let formatoFecha;
+  switch ((agrupamiento || "").toLowerCase()) {
+    case "minuto": formatoFecha = "%Y-%m-%d %H:%i:00"; break;
+    case "hora":   formatoFecha = "%Y-%m-%d %H:00:00"; break;
+    case "dia":    formatoFecha = "%Y-%m-%d 00:00:00"; break;
+    case "semana": formatoFecha = "%x-%v";             break; // ISO week
+    case "mes":    formatoFecha = "%Y-%m-01 00:00:00"; break;
+    case "año":
+    case "anio":   formatoFecha = "%Y-01-01 00:00:00"; break;
+    default:
+      return res.status(400).send("Agrupamiento no válido");
+  }
 
-    if (!fmt) return res.status(400).send('Agrupamiento no válido');
-
-    const rows = await db.query(
-      `
+  // Nota: usamos subconsulta para evitar ONLY_FULL_GROUP_BY
+  const sql = `
+    SELECT
+      x.periodo        AS fecha,
+      x.grosor         AS grosor,
+      SUM(x.volumen)   AS volumen_cubico
+    FROM (
       SELECT
-        DATE_FORMAT(fecha, ?)       AS fecha,
-        ROUND(grosor_lateral_mm,0)  AS grosor,
-        -- ancho(mm) * grosor(mm) * largo(m) → m³ (si largo=1 m para test)
-        SUM(ancho_mm * grosor_lateral_mm * 1) / 1000000.0 AS volumen_cubico
+        DATE_FORMAT(fecha, ?)                     AS periodo,
+        ROUND(grosor_lateral_mm, 0)              AS grosor,
+        (ancho_mm * grosor_lateral_mm * 1) / 1e6 AS volumen
       FROM medidas_cenital
       WHERE fecha BETWEEN ? AND ?
         AND ancho_mm IS NOT NULL
         AND grosor_lateral_mm IS NOT NULL
-      GROUP BY DATE_FORMAT(fecha, ?), ROUND(grosor_lateral_mm,0)
-      ORDER BY fecha ASC
-      `,
-      [fmt, startDate, endDate, fmt]
-    );
+    ) x
+    GROUP BY x.periodo, x.grosor
+    ORDER BY x.periodo ASC;
+  `;
 
+  try {
+    const [rows] = await dbConn.query(sql, [formatoFecha, startDate, endDate]);
     res.json(rows);
-  } catch (e) {
-    console.log('Error en la consulta a la BD:', e);
-    res.status(500).send('Error en la consulta a la BD');
+  } catch (err) {
+    console.log("Error en la consulta a la BD:", err);
+    res.status(500).send("Error en la consulta a la BD");
   }
 });
 
