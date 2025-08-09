@@ -32,19 +32,20 @@ router.get('/por-fechas', async (req, res) => {
   }
 });
 
+// routes/tablasdetectadas.js
 router.get("/cubico-por-fecha", async function (req, res) {
   const { startDate, endDate, agrupamiento = "dia" } = req.query;
   if (!startDate || !endDate) {
     return res.status(400).send("startDate y endDate son obligatorios");
   }
 
-  // Whitelist de formatos (sin placeholders en DATE_FORMAT)
+  // Map a expresiones literal (sin placeholders dentro de DATE_FORMAT)
   const fmt = (agrupamiento || "").toLowerCase();
   const exprMap = {
     minuto: 'DATE_FORMAT(fecha, "%Y-%m-%d %H:%i:00")',
     hora:   'DATE_FORMAT(fecha, "%Y-%m-%d %H:00:00")',
     dia:    'DATE_FORMAT(fecha, "%Y-%m-%d 00:00:00")',
-    semana: 'DATE_FORMAT(fecha, "%x-%v")', // ISO week
+    semana: 'DATE_FORMAT(fecha, "%x-%v")',
     mes:    'DATE_FORMAT(fecha, "%Y-%m-01 00:00:00")',
     año:    'DATE_FORMAT(fecha, "%Y-01-01 00:00:00")',
     anio:   'DATE_FORMAT(fecha, "%Y-01-01 00:00:00")',
@@ -54,9 +55,9 @@ router.get("/cubico-por-fecha", async function (req, res) {
 
   const sql = `
     SELECT
-      x.periodo                      AS fecha,
-      x.grosor                       AS grosor_lateral_mm,
-      ROUND(SUM(x.volumen), 6)       AS volumen_cubico_m3
+      x.periodo                  AS fecha,
+      x.grosor                   AS grosor_lateral_mm,
+      ROUND(SUM(x.volumen), 6)   AS volumen_cubico_m3
     FROM (
       SELECT
         ${periodoExpr}                          AS periodo,
@@ -72,13 +73,14 @@ router.get("/cubico-por-fecha", async function (req, res) {
   `;
 
   try {
-    const rows = await db.query(sql, [startDate, endDate]); // <- OJO: db, no dbConn; y sin destructuring
+    const rows = await db.query(sql, [startDate, endDate]); // usa 'db', no 'dbConn'
     res.json(rows);
   } catch (err) {
     console.log("Error en la consulta a la BD:", err);
     res.status(500).send("Error en la consulta a la BD");
   }
 });
+
 
 // === NUEVO === últimas mediciones crudas (para debug/front)
 router.get('/ultimas', async (req, res) => {
