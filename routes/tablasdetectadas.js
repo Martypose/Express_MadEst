@@ -3,44 +3,36 @@ const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
 
-// Todas (legacy) – si aún te hace falta:
-router.get('/', (req, res) => {
-  db.query('SELECT * FROM tabla_detectada', (err, rows) => {
-    if (err) return res.status(500).send('Error en la consulta a la BD');
+// Legacy (si lo sigues usando)
+router.get('/', async (req, res) => {
+  try {
+    const rows = await db.query('SELECT * FROM tabla_detectada');
     res.json(rows);
-  });
-});
-
-// Por fechas (legacy)
-router.get('/por-fechas', (req, res) => {
-  const { startDate, endDate } = req.query;
-  let sql = 'SELECT * FROM tabla_detectada';
-  const params = [];
-  if (startDate && endDate) {
-    sql += ' WHERE fecha BETWEEN ? AND ?';
-    params.push(startDate, endDate);
+  } catch (e) {
+    console.log('Error en la consulta a la BD:', e);
+    res.status(500).send('Error en la consulta a la BD');
   }
-  db.query(sql, params, (err, rows) => {
-    if (err) return res.status(500).send('Error en la consulta a la BD');
-    res.json(rows);
-  });
 });
 
-// Filtrado por grosor real desde la nueva tabla
-router.get('/por-grosor', (req, res) => {
-  const { grosor } = req.query;
-  if (!grosor) return res.status(400).send('Especifica grosor_mm');
-  db.query(
-    'SELECT * FROM medidas_cenital WHERE grosor_lateral_mm = ?',
-    [grosor],
-    (err, rows) => {
-      if (err) return res.status(500).send('Error en la consulta');
-      res.json(rows);
+// Legacy por fechas
+router.get('/por-fechas', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let sql = 'SELECT * FROM tabla_detectada';
+    const params = [];
+    if (startDate && endDate) {
+      sql += ' WHERE fecha BETWEEN ? AND ?';
+      params.push(startDate, endDate);
     }
-  );
+    const rows = await db.query(sql, params);
+    res.json(rows);
+  } catch (e) {
+    console.log('Error en la consulta a la BD:', e);
+    res.status(500).send('Error en la consulta a la BD');
+  }
 });
 
-// === NUEVO === Volumen m³ por fecha y grosor (para el chart apilado)
+// === NUEVO === Cubicaje por fecha y grosor real (tabla medidas_cenital)
 router.get('/cubico-por-fecha', async (req, res) => {
   try {
     const { startDate, endDate, agrupamiento = 'dia' } = req.query;
@@ -56,20 +48,23 @@ router.get('/cubico-por-fecha', async (req, res) => {
 
     if (!fmt) return res.status(400).send('Agrupamiento no válido');
 
-    const sql = `
+    const rows = await db.query(
+      `
       SELECT
         DATE_FORMAT(fecha, ?)       AS fecha,
         ROUND(grosor_lateral_mm,0)  AS grosor,
+        -- ancho(mm) * grosor(mm) * largo(m) → m³ (si largo=1 m para test)
         SUM(ancho_mm * grosor_lateral_mm * 1) / 1000000.0 AS volumen_cubico
       FROM medidas_cenital
       WHERE fecha BETWEEN ? AND ?
         AND ancho_mm IS NOT NULL
         AND grosor_lateral_mm IS NOT NULL
       GROUP BY DATE_FORMAT(fecha, ?), ROUND(grosor_lateral_mm,0)
-      ORDER BY fecha ASC;
-    `;
+      ORDER BY fecha ASC
+      `,
+      [fmt, startDate, endDate, fmt]
+    );
 
-    const rows = await db.query(sql, [fmt, startDate, endDate, fmt]);
     res.json(rows);
   } catch (e) {
     console.log('Error en la consulta a la BD:', e);
@@ -77,38 +72,53 @@ router.get('/cubico-por-fecha', async (req, res) => {
   }
 });
 
-// Números por medida ideal (legacy) – sin cambios
-router.get('/tablas-por-medida-y-fecha', (req, res) => {
-  const { startDate, endDate, agrupamiento } = req.query;
-
-  let formatoFecha, intervalo;
-  switch (agrupamiento) {
-    case 'minuto': intervalo = 'MINUTE'; formatoFecha = '%Y-%m-%d %H:%i'; break;
-    case 'hora':   intervalo = 'HOUR';   formatoFecha = '%Y-%m-%d %H';    break;
-    case 'dia':    intervalo = 'DAY';    formatoFecha = '%Y-%m-%d';       break;
-    case 'semana': intervalo = 'WEEK';   formatoFecha = '%Y-%u';          break;
-    case 'mes':    intervalo = 'MONTH';  formatoFecha = '%Y-%m';          break;
-    case 'año':    intervalo = 'YEAR';   formatoFecha = '%Y';             break;
-    default: return res.status(400).send('Agrupamiento no válido');
-  }
-
-  const sql = `
-    SELECT 
-      DATE_FORMAT(t.fecha, ?) as fecha,
-      m.id as medida_id,
-      (m.ancho)/10 as ancho,
-      (m.grosor)/10 as altura,
-      COUNT(*) as num_tablas
-    FROM tabla_detectada t
-    JOIN medidas_tablas m ON t.id_medida_ideal = m.id
-    WHERE t.fecha BETWEEN ? AND ?
-    GROUP BY DATE_FORMAT(t.fecha, ?), m.id, m.ancho, m.grosor;
-  `;
-
-  db.query(sql, [formatoFecha, startDate, endDate, formatoFecha], (err, rows) => {
-    if (err) return res.status(500).send('Error en la consulta a la BD');
+// === NUEVO === últimas mediciones crudas (para debug/front)
+router.get('/ultimas', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '200', 10), 1000);
+    const rows = await db.query(
+      `SELECT id, fecha, camara_id, device_id, tabla_id, frame,
+              ancho_mm, ancho_mm_base, delta_corr_mm, corregida,
+              grosor_lateral_mm, mm_por_px, px_por_mm,
+              ancho_px_mean, ancho_px_std, xl_px, xr_px, rows_valid,
+              edge_left_mm, bbox_x, bbox_y, bbox_w, bbox_h, roi_y0, roi_y1
+       FROM medidas_cenital
+       ORDER BY id DESC
+       LIMIT ?`,
+      [limit]
+    );
     res.json(rows);
-  });
+  } catch (e) {
+    console.log('Error en la consulta a la BD:', e);
+    res.status(500).send('Error en la consulta a la BD');
+  }
+});
+
+// === NUEVO === pequeño resumen rápido por día (mm reales nuevos)
+router.get('/resumen', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const rows = await db.query(
+      `
+      SELECT
+        DATE(fecha) AS fecha,
+        COUNT(*) AS piezas,
+        AVG(ancho_mm) AS ancho_mm_medio,
+        AVG(grosor_lateral_mm) AS grosor_mm_medio
+      FROM medidas_cenital
+      WHERE fecha BETWEEN ? AND ?
+        AND ancho_mm IS NOT NULL
+        AND grosor_lateral_mm IS NOT NULL
+      GROUP BY DATE(fecha)
+      ORDER BY fecha ASC
+      `,
+      [startDate, endDate]
+    );
+    res.json(rows);
+  } catch (e) {
+    console.log('Error en la consulta a la BD:', e);
+    res.status(500).send('Error en la consulta a la BD');
+  }
 });
 
 module.exports = router;
