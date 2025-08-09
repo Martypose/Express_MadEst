@@ -36,25 +36,19 @@ router.get("/por-fechas", function (req, res) {
   });
 });
 
-// GET request - tablas detectadas de un grosor específico
 router.get("/por-grosor", function (req, res) {
   const { grosor } = req.query;
-
   if (grosor) {
     dbConn.query(
-      "SELECT * FROM tabla_detectada WHERE grosor = ?",
+      "SELECT * FROM medidas_cenital WHERE grosor_mm = ?",
       [grosor],
-      function (err, result, fields) {
-        if (err) {
-          console.log("Error en la consulta a la BD: " + err);
-          res.status(500).send("Error en la consulta a la BD");
-        }
-        // Enviar resultado en forma de JSON
+      function (err, result) {
+        if (err) res.status(500).send("Error en la consulta");
         res.json(result);
       }
     );
   } else {
-    res.status(400).send("Por favor, especifica un grosor");
+    res.status(400).send("Especifica grosor_mm");
   }
 });
 
@@ -159,19 +153,13 @@ router.get("/cubico-por-fecha", function (req, res) {
       return res.status(400).send("Agrupamiento no válido");
   }
 
-  let query = `
+let query = `
     SELECT 
-      DATE_FORMAT(t.fecha, ?) as fecha,
-      m.grosor,
-      SUM((m.ancho * m.grosor * m.largo) / 1000000000) as volumen_cubico
-    FROM 
-      tabla_detectada t 
-    JOIN 
-      medidas_tablas m ON t.id_medida_ideal = m.id
-    WHERE 
-      t.fecha BETWEEN ? AND ?
-    GROUP BY 
-      DATE_FORMAT(t.fecha, ?), m.grosor;
+      DATE_FORMAT(fecha, ?) as fecha,
+      SUM(ancho_mm * grosor_mm * 1) / 1000000 as volumen_cubico_m3  -- Asume largo=1m; ajusta si mides largo
+    FROM medidas_cenital
+    WHERE fecha BETWEEN ? AND ?
+    GROUP BY DATE_FORMAT(fecha, ?);
   `;
 
   dbConn.query(

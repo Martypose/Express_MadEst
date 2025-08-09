@@ -12,6 +12,22 @@ router.get('/', function(req, res) {
   });
 });
 
+// GET todas las medidas reales
+router.get('/', function(req, res) {
+  dbConn.query('SELECT * FROM medidas_cenital', function(err, result) {  // Cambia a tu tabla mm
+    if (err) console.log('Error en la consulta: ' + err);
+    res.json(result);
+  });
+});
+
+router.post('/', function(req, res) {
+  let medida = req.body;
+  if (!medida.ancho_mm || !medida.grosor_mm) return res.status(400).send('Faltan mm reales');
+  dbConn.query('INSERT INTO medidas_cenital SET ?', medida, function(err, result) {
+    if (err) console.log('Error en el insert: ' + err);
+    res.send('Insertado correctamente');
+  });
+});
 // Insertar una nueva fila en medidas_tablas
 router.post('/', function(req, res) {
   let medida = req.body;
