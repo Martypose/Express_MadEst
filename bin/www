@@ -3,102 +3,74 @@
 /**
  * Module dependencies.
  */
+const path = require("path");
+// Cargar SIEMPRE el .env del proyecto, con override
+require("dotenv").config({ path: path.join(__dirname, "..", ".env"), override: true });
+
 const { app } = require("../app");
 const debug = require("debug")("madest:server");
 const https = require("https");
 const fs = require("fs");
-require("dotenv").config();
-/**
- * Get port from environment and store in Express.
- */
 
 // Importa la configuración de Socket.IO
 const createSocket = require("../lib/socket");
 
-const port = normalizePort(process.env.PORT || '443');
-app.set('port', port);
+/**
+ * Get port from environment and store in Express.
+ */
+const port = normalizePort(process.env.PORT || "443");
+app.set("port", port);
 
 const options = {
-  key: fs.readFileSync(`${process.env.PATH_KEY}`),
-  cert: fs.readFileSync(`${process.env.PATH_CER}`)
+  key: fs.readFileSync(process.env.PATH_KEY),
+  cert: fs.readFileSync(process.env.PATH_CER),
 };
 
 /**
  * Create HTTPS server.
  */
-
 const httpsServer = https.createServer(options, app);
 
+// Inicia Socket.IO sobre este server
 const io = createSocket(httpsServer);
+
 /**
  * Listen on provided port, on all network interfaces.
  */
-httpsServer.listen(port, '0.0.0.0');
-httpsServer.on('error', onError);
-httpsServer.on('listening', onListening);
-
-
+httpsServer.listen(port, "0.0.0.0");
+httpsServer.on("error", onError);
+httpsServer.on("listening", onListening);
 
 /**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
+  const p = parseInt(val, 10);
+  if (isNaN(p)) return val; // named pipe
+  if (p >= 0) return p;     // port number
   return false;
 }
 
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
+  if (error.syscall !== "listen") throw error;
+  const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
   switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
+    case "EACCES": console.error(bind + " requires elevated privileges"); process.exit(1);
+    case "EADDRINUSE": console.error(bind + " is already in use"); process.exit(1);
+    default: throw error;
   }
 }
 
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
-  var addr = httpsServer.address();
-  if (addr === null) {
-    console.log('El servidor está escuchando pero la dirección no está disponible.');
-  } else {
-    var bind = typeof addr === 'string'
-      ? 'pipe ' + addr
-      : 'port ' + addr.port;
-    debug('Listening on ' + bind);
-  }
+  const addr = httpsServer.address();
+  const bind = addr ? (typeof addr === "string" ? "pipe " + addr : "port " + addr.port) : "(no addr)";
+  debug("Listening on " + bind);
+  // Diagnóstico opcional (puedes quitarlo cuando verifiques):
+  console.log("[BOOT] DB_USER =", process.env.DB_USER);
 }

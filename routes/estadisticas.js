@@ -1,5 +1,5 @@
 var express = require("express");
-var dbConn = require("../lib/db");
+var db = require("../lib/db");
 var router = express.Router();
 
 // Obtener estadísticas con paginación y opcionalmente por fechas
@@ -27,7 +27,7 @@ router.get("/", function (req, res) {
     countQuery += " WHERE fecha BETWEEN ? AND ?";
   }
 
-  dbConn.query(countQuery, [fromDate, toDate], function (err, countResult) {
+  db.query(countQuery, [fromDate, toDate], function (err, countResult) {
     if (err) {
       console.log("Error en la consulta de conteo: " + err);
       return;
@@ -36,7 +36,7 @@ router.get("/", function (req, res) {
     const total = countResult[0].total;
 
     // Ahora, obtener los registros
-    dbConn.query(query, queryParams, function (err, result) {
+    db.query(query, queryParams, function (err, result) {
       if (err) {
         console.log("Error en la consulta: " + err);
         return;

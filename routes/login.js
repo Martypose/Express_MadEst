@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const dbConn  = require('../lib/db')
+const db = require('../lib/db');
 const mysql = require("mysql")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
@@ -18,7 +18,7 @@ router.post('/', async function(req, res) {
     const search_query = mysql.format(sqlSearch,[username])
     console.log(username)
 
-    await dbConn.query (search_query, async (err, result) => {
+    await db.query (search_query, async (err, result) => {
      
      if (err) throw (err)
      if (result.length == 0) {

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
 // Ruta para renovar el token
 router.get("/", async function (req, res) {
