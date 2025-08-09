@@ -1,241 +1,141 @@
+// routes/tablasdetectadas.js
 const express = require("express");
 const router = express.Router();
 const dbConn = require("../lib/db");
 
-// GET request - todas las tablas detectadas
-router.get("/", function (req, res) {
-  dbConn.query(
-    "SELECT * FROM tabla_detectada;",
-    function (err, result, fields) {
-      if (err) {
-        console.log("Error en la consulta a la BD: " + err);
-        res.status(500).send("Error en la consulta a la BD");
-      }
-      // Enviar resultado en forma de JSON
-      res.json(result);
-    }
-  );
+// GET - todas las filas legacy de tabla_detectada (compat)
+router.get("/", async (req, res) => {
+  try {
+    const rows = await dbConn.query("SELECT * FROM tabla_detectada");
+    res.json(rows);
+  } catch (err) {
+    console.log("Error en la consulta a la BD:", err);
+    res.status(500).send("Error en la consulta a la BD");
+  }
 });
 
-// GET request - tablas detectadas en un rango de fechas
-router.get("/por-fechas", function (req, res) {
+// GET - tablas detectadas en un rango de fechas (legacy)
+router.get("/por-fechas", async (req, res) => {
   const { startDate, endDate } = req.query;
-
-  let query = `SELECT * FROM tabla_detectada`;
+  let sql = "SELECT * FROM tabla_detectada";
+  const params = [];
   if (startDate && endDate) {
-    query += ` WHERE fecha BETWEEN '${startDate}' AND '${endDate}'`;
+    sql += " WHERE fecha BETWEEN ? AND ?";
+    params.push(startDate, endDate);
   }
-
-  dbConn.query(query, function (err, result, fields) {
-    if (err) {
-      console.log("Error en la consulta a la BD: " + err);
-      res.status(500).send("Error en la consulta a la BD");
-    }
-    // Enviar resultado en forma de JSON
-    res.json(result);
-  });
+  try {
+    const rows = await dbConn.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    console.log("Error en la consulta a la BD:", err);
+    res.status(500).send("Error en la consulta a la BD");
+  }
 });
 
-router.get("/por-grosor", function (req, res) {
+// GET - medidas reales por grosor (USAR grosor_lateral_mm)
+router.get("/por-grosor", async (req, res) => {
   const { grosor } = req.query;
-  if (grosor) {
-    dbConn.query(
-      "SELECT * FROM medidas_cenital WHERE grosor_mm = ?",
-      [grosor],
-      function (err, result) {
-        if (err) res.status(500).send("Error en la consulta");
-        res.json(result);
-      }
+  if (!grosor) return res.status(400).send("Especifica grosor_mm");
+  try {
+    const rows = await dbConn.query(
+      "SELECT *, grosor_lateral_mm AS grosor_mm FROM medidas_cenital WHERE grosor_lateral_mm = ?",
+      [grosor]
     );
-  } else {
-    res.status(400).send("Especifica grosor_mm");
+    res.json(rows);
+  } catch (err) {
+    console.log("Error en la consulta:", err);
+    res.status(500).send("Error en la consulta");
   }
 });
 
-// GET request - paginación de tablas detectadas
-router.get("/paginado", function (req, res) {
-  const { page = 1, limit = 10 } = req.query;
+// GET - paginado (legacy)
+router.get("/paginado", async (req, res) => {
+  const page  = Math.max(parseInt(req.query.page || "1", 10), 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit || "10", 10), 1), 500);
   const offset = (page - 1) * limit;
 
-  dbConn.query(
-    "SELECT * FROM tabla_detectada LIMIT ?, ?",
-    [offset, limit],
-    function (err, result, fields) {
-      if (err) {
-        console.log("Error en la consulta a la BD: " + err);
-        res.status(500).send("Error en la consulta a la BD");
-      }
-      // Enviar resultado en forma de JSON
-      res.json(result);
-    }
-  );
+  try {
+    const rows = await dbConn.query("SELECT * FROM tabla_detectada LIMIT ?, ?", [offset, limit]);
+    res.json(rows);
+  } catch (err) {
+    console.log("Error en la consulta a la BD:", err);
+    res.status(500).send("Error en la consulta a la BD");
+  }
 });
 
-// POST request
-router.post("/", function (req, res) {
-  let tabla = req.body;
-
-  dbConn.query(
-    `INSERT INTO tabla_detectada SET grosor=?, longitud=?, cantidad=?, fecha=?`,
-    [tabla.grosor, tabla.longitud, tabla.cantidad, tabla.fecha],
-    function (err, result) {
-      if (err) {
-        console.log("Error en el INSERT: " + err);
-        res.status(500).send("Error al insertar en la BD");
-      } else {
-        // Enviar resultado en forma de JSON
-        res.send("Se ha insertado correctamente");
-      }
-    }
-  );
+// POST legacy
+router.post("/", async (req, res) => {
+  const t = req.body;
+  try {
+    await dbConn.query(
+      `INSERT INTO tabla_detectada (grosor, longitud, cantidad, fecha) VALUES (?, ?, ?, ?)`,
+      [t.grosor, t.longitud, t.cantidad, t.fecha]
+    );
+    res.send("Se ha insertado correctamente");
+  } catch (err) {
+    console.log("Error en el INSERT:", err);
+    res.status(500).send("Error al insertar en la BD");
+  }
 });
 
-// DELETE request
-router.delete("/:id", function (req, res) {
-  dbConn.query(
-    "DELETE FROM tabla_detectada WHERE id=?",
-    [req.params.id],
-    function (err, result) {
-      if (err) {
-        console.log("Error en el borrado: " + err);
-        res.status(500).send("Error al eliminar de la BD");
-      } else {
-        // Enviar resultado en forma de JSON
-        res.send("Borrado correctamente");
-      }
-    }
-  );
+// DELETE legacy
+router.delete("/:id", async (req, res) => {
+  try {
+    await dbConn.query("DELETE FROM tabla_detectada WHERE id=?", [req.params.id]);
+    res.send("Borrado correctamente");
+  } catch (err) {
+    console.log("Error en el borrado:", err);
+    res.status(500).send("Error al eliminar de la BD");
+  }
 });
 
-// PUT request
-router.put("/", function (req, res) {
-  let tabla = req.body;
-
-  dbConn.query(
-    "UPDATE tabla_detectada SET grosor=?, longitud=?, cantidad=?, fecha=? WHERE id=?",
-    [tabla.grosor, tabla.longitud, tabla.cantidad, tabla.fecha, tabla.id],
-    function (err, result) {
-      if (err) {
-        console.log("Error en el UPDATE: " + err);
-        res.status(500).send("Error al actualizar la BD");
-      } else {
-        // Enviar mensaje de éxito
-        res.send("Actualizado con éxito");
-      }
-    }
-  );
+// PUT legacy
+router.put("/", async (req, res) => {
+  const t = req.body;
+  try {
+    await dbConn.query(
+      "UPDATE tabla_detectada SET grosor=?, longitud=?, cantidad=?, fecha=? WHERE id=?",
+      [t.grosor, t.longitud, t.cantidad, t.fecha, t.id]
+    );
+    res.send("Actualizado con éxito");
+  } catch (err) {
+    console.log("Error en el UPDATE:", err);
+    res.status(500).send("Error al actualizar la BD");
+  }
 });
 
-router.get("/cubico-por-fecha", function (req, res) {
+// NUEVO: cúbico por fecha (usa ancho_mm * grosor_lateral_mm * 1m)
+router.get("/cubico-por-fecha", async (req, res) => {
   const { startDate, endDate, agrupamiento } = req.query;
 
-  let formatoFecha;
-  switch (agrupamiento) {
-    case "minuto":
-      formatoFecha = "%Y-%m-%d %H:%i";
-      break;
-    case "hora":
-      formatoFecha = "%Y-%m-%d %H";
-      break;
-    case "dia":
-      formatoFecha = "%Y-%m-%d";
-      break;
-    case "semana":
-      formatoFecha = "%Y-%u";
-      break;
-    case "mes":
-      formatoFecha = "%Y-%m";
-      break;
-    case "año":
-      formatoFecha = "%Y";
-      break;
-    default:
-      return res.status(400).send("Agrupamiento no válido");
-  }
+  const formatos = {
+    minuto: "%Y-%m-%d %H:%i",
+    hora:   "%Y-%m-%d %H",
+    dia:    "%Y-%m-%d",
+    semana: "%Y-%u",
+    mes:    "%Y-%m",
+    año:    "%Y"
+  };
+  const formatoFecha = formatos[agrupamiento];
+  if (!formatoFecha) return res.status(400).send("Agrupamiento no válido");
 
-let query = `
+  const sql = `
     SELECT 
-      DATE_FORMAT(fecha, ?) as fecha,
-      SUM(ancho_mm * grosor_mm * 1) / 1000000 as volumen_cubico_m3  -- Asume largo=1m; ajusta si mides largo
+      DATE_FORMAT(fecha, ?) AS fecha,
+      SUM(ancho_mm * grosor_lateral_mm * 1) / 1000000 AS volumen_cubico_m3
     FROM medidas_cenital
     WHERE fecha BETWEEN ? AND ?
-    GROUP BY DATE_FORMAT(fecha, ?);
+    GROUP BY DATE_FORMAT(fecha, ?)
+    ORDER BY MIN(fecha) ASC
   `;
 
-  dbConn.query(
-    query,
-    [formatoFecha, startDate, endDate, formatoFecha],
-    function (err, result) {
-      if (err) {
-        console.log("Error en la consulta a la BD: " + err);
-        res.status(500).send("Error en la consulta a la BD");
-      }
-      res.json(result);
-    }
-  );
-});
-
-router.get("/tablas-por-medida-y-fecha", function (req, res) {
-  const { startDate, endDate, agrupamiento } = req.query;
-
-  let formatoFecha;
-  switch (agrupamiento) {
-    case "minuto":
-      intervalo = "MINUTE";
-      formatoFecha = "%Y-%m-%d %H:%i";
-      break;
-    case "hora":
-      intervalo = "HOUR";
-      formatoFecha = "%Y-%m-%d %H";
-      break;
-    case "dia":
-      intervalo = "DAY";
-      formatoFecha = "%Y-%m-%d";
-      break;
-    case "semana":
-      intervalo = "WEEK";
-      formatoFecha = "%Y-%u";
-      break;
-    case "mes":
-      intervalo = "MONTH";
-      formatoFecha = "%Y-%m";
-      break;
-    case "año":
-      intervalo = "YEAR";
-      formatoFecha = "%Y";
-      break;
-    default:
-      return res.status(400).send("Agrupamiento no válido");
+  try {
+    const rows = await dbConn.query(sql, [formatoFecha, startDate, endDate, formatoFecha]);
+    res.json(rows);
+  } catch (err) {
+    console.log("Error en la consulta a la BD:", err);
+    res.status(500).send("Error en la consulta a la BD");
   }
-
-  let query = `
-  SELECT 
-  DATE_FORMAT(t.fecha, ?) as fecha,
-  m.id as medida_id,
-  (m.ancho)/10 as ancho,
-  (m.grosor)/10 as altura,
-  COUNT(*) as num_tablas
-FROM 
-  tabla_detectada t 
-JOIN 
-  medidas_tablas m ON t.id_medida_ideal = m.id
-WHERE 
-  t.fecha BETWEEN ? AND ?
-GROUP BY 
-  DATE_FORMAT(t.fecha, ?), m.id, m.ancho, m.grosor;
-  `;
-
-  dbConn.query(
-    query,
-    [formatoFecha, startDate, endDate, formatoFecha],
-    function (err, result) {
-      if (err) {
-        console.log("Error en la consulta a la BD: " + err);
-        res.status(500).send("Error en la consulta a la BD");
-      }
-      res.json(result);
-    }
-  );
 });
 
 module.exports = router;
