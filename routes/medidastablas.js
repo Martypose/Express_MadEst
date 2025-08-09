@@ -1,50 +1,42 @@
 // routes/medidastablas.js
 const express = require('express');
 const router = express.Router();
-const dbConn = require('../lib/db');
+const db = require('../lib/db');
 
-// Obtener todas las medidas_tablas
-router.get('/', async (req, res) => {
-  try {
-    const rows = await dbConn.query('SELECT * FROM medidas_tablas');
+// Listar medidas_tablas
+router.get('/', (req, res) => {
+  db.query('SELECT * FROM medidas_tablas', (err, rows) => {
+    if (err) return res.status(500).send('Error en la consulta');
     res.json(rows);
-  } catch (err) {
-    console.log('Error en la consulta:', err);
-    res.status(500).send('Error en la consulta');
-  }
+  });
 });
 
-// Insertar una nueva medida ideal
-router.post('/', async (req, res) => {
-  try {
-    await dbConn.query('INSERT INTO medidas_tablas SET ?', [req.body]);
+// Insertar nueva medida_tabla
+router.post('/', (req, res) => {
+  const medida = req.body;
+  db.query('INSERT INTO medidas_tablas SET ?', medida, (err) => {
+    if (err) return res.status(500).send('Error en el insert');
     res.send('Insertado correctamente');
-  } catch (err) {
-    console.log('Error en el insert:', err);
-    res.status(500).send('Error en el insert');
-  }
+  });
 });
 
-// Actualizar por ID
-router.put('/:id', async (req, res) => {
-  try {
-    await dbConn.query('UPDATE medidas_tablas SET ? WHERE id = ?', [req.body, req.params.id]);
+// Actualizar medida_tabla por ID
+router.put('/:id', (req, res) => {
+  const id = req.params.id;
+  const medida = req.body;
+  db.query('UPDATE medidas_tablas SET ? WHERE id = ?', [medida, id], (err) => {
+    if (err) return res.status(500).send('Error en la actualización');
     res.send('Actualizado correctamente');
-  } catch (err) {
-    console.log('Error en la actualización:', err);
-    res.status(500).send('Error en la actualización');
-  }
+  });
 });
 
-// Borrar por ID
-router.delete('/:id', async (req, res) => {
-  try {
-    await dbConn.query('DELETE FROM medidas_tablas WHERE id = ?', [req.params.id]);
+// Borrar medida_tabla por ID
+router.delete('/:id', (req, res) => {
+  const id = req.params.id;
+  db.query('DELETE FROM medidas_tablas WHERE id = ?', [id], (err) => {
+    if (err) return res.status(500).send('Error en el borrado');
     res.send('Borrado correctamente');
-  } catch (err) {
-    console.log('Error en el borrado:', err);
-    res.status(500).send('Error en el borrado');
-  }
+  });
 });
 
 module.exports = router;
