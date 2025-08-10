@@ -1,49 +1,53 @@
-var express = require("express");
-var db = require("../lib/db");
-var router = express.Router();
+// routes/estadisticas.js
+const express = require('express');
+const router = express.Router();
+const db = require('../lib/db'); // usa el pool unificado (promesas/callback) :contentReference[oaicite:1]{index=1}
 
-// Obtener estadísticas con paginación y opcionalmente por fechas
-router.get("/", function (req, res) {
-  let limit = parseInt(req.query.limit) || 10; // número de registros por página
-  let offset = parseInt(req.query.offset) || 0; // inicio del offset
-  let fromDate = req.query.fromDate;
-  let toDate = req.query.toDate;
+// Convierte ISO/Z → 'YYYY-MM-DD HH:mm:SS' (MySQL DATETIME)
+function isoToMysql(v) {
+  if (!v) return null;
+  const d = new Date(v);
+  if (isNaN(d)) return null;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
 
-  let query =
-    'SELECT id, DATE_FORMAT(fecha, "%Y-%m-%d %H:%i:%s") as fecha, uso_cpu, uso_memoria, carga_cpu, temperatura, id_raspberry FROM estadisticas';
-  let queryParams = [];
+router.get('/', async (req, res) => {
+  try {
+    // Asegura números para LIMIT/OFFSET
+    const limit  = Math.min(Number(req.query.limit)  || 15, 1000);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
 
-  if (fromDate && toDate) {
-    query += " WHERE fecha BETWEEN ? AND ?";
-    queryParams.push(fromDate, toDate);
+    const fromDate = isoToMysql(req.query.fromDate);
+    const toDate   = isoToMysql(req.query.toDate);
+
+    const baseSelect = `
+      SELECT
+        id,
+        DATE_FORMAT(fecha, "%Y-%m-%d %H:%i:%s") AS fecha,
+        uso_cpu, uso_memoria, carga_cpu, temperatura, id_raspberry
+      FROM estadisticas
+    `;
+    const baseCount = `SELECT COUNT(*) AS total FROM estadisticas`;
+
+    const hasRange = !!(fromDate && toDate);
+    const where = hasRange ? ` WHERE fecha BETWEEN ? AND ?` : ``;
+
+    const dataSql   = `${baseSelect}${where} ORDER BY fecha DESC LIMIT ? OFFSET ?`;
+    const dataArgs  = hasRange ? [fromDate, toDate, limit, offset] : [limit, offset];
+
+    const countSql  = `${baseCount}${where}`;
+    const countArgs = hasRange ? [fromDate, toDate] : [];
+
+    // Ejecuta ambas consultas
+    const totalRows = await db.query(countSql, countArgs);
+    const rows      = await db.query(dataSql, dataArgs);
+
+    res.json({ data: rows, total: totalRows[0]?.total ?? 0 });
+  } catch (err) {
+    console.log('Error en la consulta:', err);
+    res.status(500).send('Error en la consulta');
   }
-  query += " ORDER BY fecha DESC";
-  query += " LIMIT ? OFFSET ?";
-  queryParams.push(limit, offset);
-
-  // Primero, obtener el número total de registros que coinciden con los filtros
-  let countQuery = "SELECT COUNT(*) as total FROM estadisticas";
-  if (fromDate && toDate) {
-    countQuery += " WHERE fecha BETWEEN ? AND ?";
-  }
-
-  db.query(countQuery, [fromDate, toDate], function (err, countResult) {
-    if (err) {
-      console.log("Error en la consulta de conteo: " + err);
-      return;
-    }
-
-    const total = countResult[0].total;
-
-    // Ahora, obtener los registros
-    db.query(query, queryParams, function (err, result) {
-      if (err) {
-        console.log("Error en la consulta: " + err);
-        return;
-      }
-      res.json({ data: result, total: total });
-    });
-  });
 });
 
 module.exports = router;
