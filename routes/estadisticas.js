@@ -1,4 +1,3 @@
-// routes/estadisticas.js
 const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
@@ -14,8 +13,9 @@ function isoToMysql(v) {
 
 router.get('/', async (req, res) => {
   try {
-    const limit  = Math.min(Number(req.query.limit)  || 15, 1000);
-    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    // Sanitiza números (luego irán embebidos en el SQL)
+    const limit  = Math.min(parseInt(req.query.limit, 10)  || 15, 1000);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
 
     const fromDate = isoToMysql(req.query.fromDate);
     const toDate   = isoToMysql(req.query.toDate);
@@ -29,8 +29,10 @@ router.get('/', async (req, res) => {
     const baseCount  = `SELECT COUNT(*) AS total FROM estadisticas`;
     const where      = hasRange ? ` WHERE fecha BETWEEN ? AND ?` : ``;
 
-    const dataSql   = `${baseSelect}${where} ORDER BY fecha DESC LIMIT ? OFFSET ?`;
-    const dataArgs  = hasRange ? [fromDate, toDate, limit, offset] : [limit, offset];
+    // ❗ NO usar placeholders en LIMIT/OFFSET con execute()
+    const dataSql   = `${baseSelect}${where} ORDER BY fecha DESC LIMIT ${limit} OFFSET ${offset}`;
+    const dataArgs  = hasRange ? [fromDate, toDate] : [];
+
     const countSql  = `${baseCount}${where}`;
     const countArgs = hasRange ? [fromDate, toDate] : [];
 
