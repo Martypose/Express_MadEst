@@ -25,11 +25,10 @@ router.get('/', async (req, res) => {
 
     // TZ objetivo para presentar (puedes cambiarla por env)
     const TARGET_TZ = process.env.TARGET_TZ || 'Europe/Madrid';
-    // Fallback si no hay tablas de TZ: minutos de desfase local respecto a UTC (ej. 120 en CEST)
-    const FALLBACK_OFFSET_MIN = -new Date().getTimezoneOffset();
+    // Fallback si no hay tablas de TZ: minutos de desfase local respecto a UTC
+    const FALLBACK_OFFSET_MIN = -new Date().getTimezoneOffset(); // e.g. 120 en CEST
 
-    // SELECT con fecha_local (CONVERT_TZ, o DATE_ADD si no hay TZ tables),
-    // y con alias 'fecha' = misma fecha_local (compat con front antiguo).
+    // SELECT con fecha_local (CONVERT_TZ, o DATE_ADD si no hay TZ tables) y fecha_utc
     const selectSql = `
       SELECT
         id,
@@ -40,13 +39,6 @@ router.get('/', async (req, res) => {
           ),
           "%Y-%m-%d %H:%i:%s"
         ) AS fecha_local,
-        DATE_FORMAT(
-          IFNULL(
-            CONVERT_TZ(fecha, '+00:00', ?),
-            DATE_ADD(fecha, INTERVAL ? MINUTE)
-          ),
-          "%Y-%m-%d %H:%i:%s"
-        ) AS fecha,  -- alias compat
         DATE_FORMAT(fecha, "%Y-%m-%d %H:%i:%s") AS fecha_utc,
         uso_cpu, uso_memoria, carga_cpu, temperatura, id_raspberry
       FROM estadisticas
@@ -54,11 +46,9 @@ router.get('/', async (req, res) => {
       ORDER BY fecha DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
-
-    // Pasamos TARGET_TZ y FALLBACK dos veces (fecha_local y alias fecha)
     const selectArgs = hasRange
-      ? [TARGET_TZ, FALLBACK_OFFSET_MIN, TARGET_TZ, FALLBACK_OFFSET_MIN, fromDate, toDate]
-      : [TARGET_TZ, FALLBACK_OFFSET_MIN, TARGET_TZ, FALLBACK_OFFSET_MIN];
+      ? [TARGET_TZ, FALLBACK_OFFSET_MIN, fromDate, toDate]
+      : [TARGET_TZ, FALLBACK_OFFSET_MIN];
 
     const countSql  = `SELECT COUNT(*) AS total FROM estadisticas ${hasRange ? `WHERE fecha BETWEEN ? AND ?` : ``}`;
     const countArgs = hasRange ? [fromDate, toDate] : [];
