@@ -3,18 +3,19 @@ const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
 
-// Legacy (si lo sigues usando)
+// --- RUTAS LEGACY (apuntan a la tabla antigua `tabla_detectada`) ---
+// Se mantienen por compatibilidad, pero las nuevas vistas deben usar las rutas de `medidas_cenital`.
+
 router.get('/', async (req, res) => {
   try {
     const rows = await db.query('SELECT * FROM tabla_detectada');
     res.json(rows);
   } catch (e) {
-    console.log('Error en la consulta a la BD:', e);
-    res.status(500).send('Error en la consulta a la BD');
+    console.log('Error en la consulta a la BD (legacy):', e);
+    res.status(500).send('Error en la consulta a la BD (legacy)');
   }
 });
 
-// Legacy por fechas
 router.get('/por-fechas', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -27,19 +28,20 @@ router.get('/por-fechas', async (req, res) => {
     const rows = await db.query(sql, params);
     res.json(rows);
   } catch (e) {
-    console.log('Error en la consulta a la BD:', e);
-    res.status(500).send('Error en la consulta a la BD');
+    console.log('Error en la consulta a la BD (legacy):', e);
+    res.status(500).send('Error en la consulta a la BD (legacy)');
   }
 });
 
-// routes/tablasdetectadas.js
+
+// --- RUTAS MODERNAS (apuntan a la tabla `medidas_cenital`) ---
+
 router.get("/cubico-por-fecha", async function (req, res) {
-  const { startDate, endDate, agrupamiento = "dia" } = req.query;
+  const { startDate, endDate, agrupamiento = "dia", descabezadaFilter = "all" } = req.query;
   if (!startDate || !endDate) {
     return res.status(400).send("startDate y endDate son obligatorios");
   }
 
-  // Map a expresiones literal (sin placeholders dentro de DATE_FORMAT)
   const fmt = (agrupamiento || "").toLowerCase();
   const exprMap = {
     minuto: 'DATE_FORMAT(fecha, "%Y-%m-%d %H:%i:00")',
@@ -53,6 +55,21 @@ router.get("/cubico-por-fecha", async function (req, res) {
   const periodoExpr = exprMap[fmt];
   if (!periodoExpr) return res.status(400).send("Agrupamiento no válido");
 
+  // NEW: Construcción dinámica de la cláusula WHERE
+  const whereClauses = [
+    `fecha BETWEEN ? AND ?`,
+    `ancho_mm IS NOT NULL`,
+    `grosor_lateral_mm IS NOT NULL`
+  ];
+  const params = [startDate, endDate];
+
+  if (descabezadaFilter === 'ok') {
+    whereClauses.push(`descabezada = 0`);
+  } else if (descabezadaFilter === 'desc') {
+    whereClauses.push(`descabezada = 1`);
+  }
+  // si es 'all', no se añade filtro de descabezada
+
   const sql = `
     SELECT
       x.periodo                  AS fecha,
@@ -64,16 +81,14 @@ router.get("/cubico-por-fecha", async function (req, res) {
         ROUND(grosor_lateral_mm, 0)            AS grosor,
         (ancho_mm * grosor_lateral_mm * 1) / 1e6 AS volumen
       FROM medidas_cenital
-      WHERE fecha BETWEEN ? AND ?
-        AND ancho_mm IS NOT NULL
-        AND grosor_lateral_mm IS NOT NULL
+      WHERE ${whereClauses.join(' AND ')}
     ) x
     GROUP BY x.periodo, x.grosor
     ORDER BY x.periodo ASC;
   `;
 
   try {
-    const rows = await db.query(sql, [startDate, endDate]); // usa 'db', no 'dbConn'
+    const rows = await db.query(sql, params);
     res.json(rows);
   } catch (err) {
     console.log("Error en la consulta a la BD:", err);
@@ -88,12 +103,15 @@ router.get('/ultimas', async (req, res) => {
     if (!Number.isFinite(limit) || limit < 1) limit = 200;
     limit = Math.min(limit, 1000);
 
+    // CHANGED: Se añade `tabla_uid` y las columnas de descabezado al SELECT.
     const sql = `
-      SELECT id, fecha, camara_id, device_id, tabla_id, frame,
+      SELECT id, tabla_id, tabla_uid, frame, camara_id, device_id,
              ancho_mm, ancho_mm_base, delta_corr_mm, corregida,
              grosor_lateral_mm, mm_por_px, px_por_mm,
              ancho_px_mean, ancho_px_std, xl_px, xr_px, rows_valid,
-             edge_left_mm, bbox_x, bbox_y, bbox_w, bbox_h, roi_y0, roi_y1
+             edge_left_mm, bbox_x, bbox_y, bbox_w, bbox_h, roi_y0, roi_y1,
+             descabezada, desc_causa, desc_tip_score, desc_tip_ok,
+             desc_shape_taper_ratio, desc_shape_taper_drop
       FROM medidas_cenital
       ORDER BY id DESC
       LIMIT ${limit}
@@ -108,12 +126,12 @@ router.get('/ultimas', async (req, res) => {
 
 router.get('/piezas', async (req, res) => {
   try {
-    let { startDate, endDate, limit='200', offset='0', orderBy='fecha', orderDir='desc' } = req.query;
+    let { startDate, endDate, limit='200', offset='0', orderBy='fecha', orderDir='desc', descabezadaFilter = 'all' } = req.query;
     if (!startDate || !endDate) {
       return res.status(400).json({ error: "startDate y endDate son obligatorios" });
     }
 
-    const ORDER_COLS = { id:'id', fecha:'fecha', ancho_mm:'ancho_mm', grosor_mm:'grosor_lateral_mm' };
+    const ORDER_COLS = { id:'id', fecha:'fecha', ancho_mm:'ancho_mm', grosor_mm:'grosor_lateral_mm', tabla_uid: 'tabla_uid' };
     const col = ORDER_COLS[String(orderBy||'').toLowerCase()] || 'fecha';
     const dir = String(orderDir||'').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
@@ -123,19 +141,30 @@ router.get('/piezas', async (req, res) => {
     const TARGET_TZ = process.env.TARGET_TZ || 'Europe/Madrid';
     const FALLBACK_OFFSET_MIN = -new Date().getTimezoneOffset();
 
-    const countSql = `
-      SELECT COUNT(*) AS total
-      FROM medidas_cenital
-      WHERE fecha BETWEEN ? AND ?
-        AND ancho_mm IS NOT NULL
-        AND grosor_lateral_mm IS NOT NULL
-    `;
-    const totalRows = await db.query(countSql, [startDate, endDate]);
+    // NEW: Construcción dinámica de la cláusula WHERE
+    const whereClauses = [
+      `fecha BETWEEN ? AND ?`,
+      `ancho_mm IS NOT NULL`,
+      `grosor_lateral_mm IS NOT NULL`
+    ];
+    const params = [startDate, endDate];
+
+    if (descabezadaFilter === 'ok') {
+      whereClauses.push(`descabezada = 0`);
+    } else if (descabezadaFilter === 'desc') {
+      whereClauses.push(`descabezada = 1`);
+    }
+
+    const whereSql = whereClauses.join(' AND ');
+
+    const countSql = `SELECT COUNT(*) AS total FROM medidas_cenital WHERE ${whereSql}`;
+    const totalRows = await db.query(countSql, params);
     const total = totalRows[0]?.total ?? 0;
 
+    // CHANGED: Se añade `tabla_uid` y TODAS las columnas `desc_*` al SELECT.
     const dataSql = `
       SELECT
-        id, tabla_id, frame, camara_id, device_id,
+        id, tabla_id, tabla_uid, frame, camara_id, device_id,
         DATE_FORMAT(
           IFNULL(CONVERT_TZ(fecha, '+00:00', ?), DATE_ADD(fecha, INTERVAL ${FALLBACK_OFFSET_MIN} MINUTE)),
           "%Y-%m-%d %H:%i:%s"
@@ -146,15 +175,18 @@ router.get('/piezas', async (req, res) => {
         mm_por_px, px_por_mm, ancho_px_mean, ancho_px_std,
         xl_px, xr_px, rows_valid,
         edge_left_mm, bbox_x, bbox_y, bbox_w, bbox_h,
-        roi_y0, roi_y1
+        roi_y0, roi_y1,
+        descabezada, desc_causa, desc_tip_score, desc_tip_ok, desc_tip_thr,
+        desc_tip_roi_y0, desc_tip_roi_y1, desc_shape_taper_ratio,
+        desc_shape_taper_drop, desc_shape_area_ratio, desc_shape_slope_norm,
+        desc_shape_centroid_pct
       FROM medidas_cenital
-      WHERE fecha BETWEEN ? AND ?
-        AND ancho_mm IS NOT NULL
-        AND grosor_lateral_mm IS NOT NULL
+      WHERE ${whereSql}
       ORDER BY ${col} ${dir}
       LIMIT ${limit} OFFSET ${offset}
     `;
-    const rows = await db.query(dataSql, [TARGET_TZ, startDate, endDate]);
+    const dataParams = [TARGET_TZ, ...params];
+    const rows = await db.query(dataSql, dataParams);
 
     res.json({ data: rows, total });
   } catch (e) {
@@ -164,10 +196,23 @@ router.get('/piezas', async (req, res) => {
 });
 
 
-// === NUEVO === pequeño resumen rápido por día (mm reales nuevos)
 router.get('/resumen', async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, descabezadaFilter = "all" } = req.query;
+
+    const whereClauses = [
+      `fecha BETWEEN ? AND ?`,
+      `ancho_mm IS NOT NULL`,
+      `grosor_lateral_mm IS NOT NULL`
+    ];
+    const params = [startDate, endDate];
+
+    if (descabezadaFilter === 'ok') {
+      whereClauses.push(`descabezada = 0`);
+    } else if (descabezadaFilter === 'desc') {
+      whereClauses.push(`descabezada = 1`);
+    }
+
     const rows = await db.query(
       `
       SELECT
@@ -176,13 +221,11 @@ router.get('/resumen', async (req, res) => {
         AVG(ancho_mm) AS ancho_mm_medio,
         AVG(grosor_lateral_mm) AS grosor_mm_medio
       FROM medidas_cenital
-      WHERE fecha BETWEEN ? AND ?
-        AND ancho_mm IS NOT NULL
-        AND grosor_lateral_mm IS NOT NULL
+      WHERE ${whereClauses.join(' AND ')}
       GROUP BY DATE(fecha)
       ORDER BY fecha ASC
       `,
-      [startDate, endDate]
+      params
     );
     res.json(rows);
   } catch (e) {
