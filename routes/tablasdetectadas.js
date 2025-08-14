@@ -105,7 +105,7 @@ router.get('/ultimas', async (req, res) => {
 
     // CHANGED: Se añade `tabla_uid` y las columnas de descabezado al SELECT.
     const sql = `
-      SELECT id, tabla_id, tabla_uid, frame, camara_id, device_id,
+      SELECT id, tabla_id, tabla_uid, camara_id, device_id,
              ancho_mm, ancho_mm_base, delta_corr_mm, corregida,
              grosor_lateral_mm, mm_por_px, px_por_mm,
              ancho_px_mean, ancho_px_std, xl_px, xr_px, rows_valid,
@@ -164,7 +164,7 @@ router.get('/piezas', async (req, res) => {
     // CHANGED: Se añade `tabla_uid` y TODAS las columnas `desc_*` al SELECT.
     const dataSql = `
       SELECT
-        id, tabla_id, tabla_uid, frame, camara_id, device_id,
+        id, tabla_id, tabla_uid, camara_id, device_id,
         DATE_FORMAT(
           IFNULL(CONVERT_TZ(fecha, '+00:00', ?), DATE_ADD(fecha, INTERVAL ${FALLBACK_OFFSET_MIN} MINUTE)),
           "%Y-%m-%d %H:%i:%s"
