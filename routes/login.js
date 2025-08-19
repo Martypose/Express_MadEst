@@ -1,63 +1,35 @@
-const express = require('express')
-const router = express.Router()
+// Express_MadEst/routes/login.js
+const express = require('express');
+const router = express.Router();
 const db = require('../lib/db');
-const mysql = require("mysql")
-const bcrypt = require("bcrypt")
-const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt');
+const { signAccessToken, signRefreshToken } = require('../lib/jwt');
 
-const tokenList = {}
-
-//logear usuario
+// POST /login  { name, password }
 router.post('/', async function(req, res) {
-  
-  console.log('hola')
-    const username = req.body.name
-    const password = req.body.password
+  const username = req.body?.name;
+  const password = req.body?.password;
+  if (!username || !password) return res.status(400).json({ error: 'name y password son obligatorios' });
 
-    const sqlSearch = "Select * from usuarios where username = ?"
-    const search_query = mysql.format(sqlSearch,[username])
-    console.log(username)
+  try {
+    const rows = await db.query('SELECT id, username, password, usertype FROM usuarios WHERE username = ?', [username]);
+    const user = rows[0];
+    const ok = user && await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ error: 'Credenciales inválidas' });
 
-    await db.query (search_query, async (err, result) => {
-     
-     if (err) throw (err)
-     if (result.length == 0) {
-      console.log("--------> User does not exist")
-      res.header().json({
-        message: 'Usuario no existe!',
-    })
-     }else {
-        const hashedPassword = result[0].password
-        //get the hashedPassword from result
-    if (await bcrypt.compare(password, hashedPassword)) {
-        // create accesstoken
-    const accessToken = jwt.sign({
-      name: username
-    }, process.env.TOKEN_SECRET, {expiresIn: process.env.JWT_ACCESS_EXPIRATION})
+    const accessToken  = signAccessToken(user);
+    const refreshToken = signRefreshToken(user);
 
-    const refreshToken = jwt.sign({
-      name: username
-    }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRATION})
-
-       console.log("---------> Login Successful")
-       res.header('autorizado').json({
-        accessToken: {accessToken},
-        refreshToken: {refreshToken},
-        message: 'Bienvenido '+username+ '!',
-        username: username
-    })
-       } else {
-       console.log("---------> Password Incorrect")
-       res.header().json({
-        message: 'Password incorrecta!',
-    })
-       } //end of bcrypt.compare()
-     }//end of User exists i.e. results.length==0
-
+    // Formato ANIDADO (compat con tu front actual)
+    return res.json({
+      accessToken:  { accessToken },
+      refreshToken: { refreshToken },
+      username: user.username,
+      role: user.usertype
     });
+  } catch (err) {
+    return res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
-
-
-
-  module.exports = router;
+module.exports = router;
