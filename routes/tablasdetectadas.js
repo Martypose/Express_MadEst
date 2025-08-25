@@ -36,29 +36,11 @@ router.get('/por-fechas', async (req, res) => {
 
 // --- RUTAS MODERNAS (apuntan a la tabla `medidas_cenital`) ---
 
-/**
- * Cúbico agregado por fecha y grosor.
- * Longitudes:
- *  - Normal: 2.5 m  (ENV LONGITUD_NORMAL_M)
- *  - Descabezada: 2.0 m (ENV LONGITUD_DESCABEZADA_M)
- *
- * volumen (m³) = (ancho_mm * grosor_mm * longitud_m) / 1e6
- */
 router.get("/cubico-por-fecha", async function (req, res) {
-  const {
-    startDate,
-    endDate,
-    agrupamiento = "dia",
-    descabezadaFilter = "all",
-  } = req.query;
-
+  const { startDate, endDate, agrupamiento = "dia", descabezadaFilter = "all" } = req.query;
   if (!startDate || !endDate) {
     return res.status(400).send("startDate y endDate son obligatorios");
   }
-
-  // Longitudes configurables (m)
-  const LEN_OK_M   = Number(process.env.LONGITUD_NORMAL_M)       || 2.5;
-  const LEN_DESC_M = Number(process.env.LONGITUD_DESCABEZADA_M)  || 2.0;
 
   const fmt = (agrupamiento || "").toLowerCase();
   const exprMap = {
@@ -73,34 +55,31 @@ router.get("/cubico-por-fecha", async function (req, res) {
   const periodoExpr = exprMap[fmt];
   if (!periodoExpr) return res.status(400).send("Agrupamiento no válido");
 
-  // WHERE dinámico
+  // NEW: Construcción dinámica de la cláusula WHERE
   const whereClauses = [
     `fecha BETWEEN ? AND ?`,
     `ancho_mm IS NOT NULL`,
-    `grosor_lateral_mm IS NOT NULL`,
+    `grosor_lateral_mm IS NOT NULL`
   ];
   const params = [startDate, endDate];
 
-  if (descabezadaFilter === "ok") {
+  if (descabezadaFilter === 'ok') {
     whereClauses.push(`descabezada = 0`);
-  } else if (descabezadaFilter === "desc") {
+  } else if (descabezadaFilter === 'desc') {
     whereClauses.push(`descabezada = 1`);
   }
+  // si es 'all', no se añade filtro de descabezada
 
-  // Importante: usamos longitud en metros (2.5 / 2.0) dentro del cálculo y dividimos por 1e6 (mm→m).
-  // Parametrizamos las longitudes para no hardcodear valores.
   const sql = `
     SELECT
-      x.periodo                AS fecha,
-      x.grosor                 AS grosor_lateral_mm,
-      ROUND(SUM(x.volumen), 6) AS volumen_cubico_m3
+      x.periodo                  AS fecha,
+      x.grosor                   AS grosor_lateral_mm,
+      ROUND(SUM(x.volumen), 6)   AS volumen_cubico_m3
     FROM (
       SELECT
-        ${periodoExpr}                           AS periodo,
-        ROUND(grosor_lateral_mm, 0)             AS grosor,
-        (ancho_mm * grosor_lateral_mm *
-           (CASE WHEN descabezada = 1 THEN ? ELSE ? END)
-        ) / 1e6                                  AS volumen
+        ${periodoExpr}                          AS periodo,
+        ROUND(grosor_lateral_mm, 0)            AS grosor,
+        (ancho_mm * grosor_lateral_mm * 1) / 1e6 AS volumen
       FROM medidas_cenital
       WHERE ${whereClauses.join(' AND ')}
     ) x
@@ -109,8 +88,7 @@ router.get("/cubico-por-fecha", async function (req, res) {
   `;
 
   try {
-    // Añadimos las longitudes dos veces (una para cada CASE del SELECT interno)
-    const rows = await db.query(sql, [LEN_DESC_M, LEN_OK_M, ...params]);
+    const rows = await db.query(sql, params);
     res.json(rows);
   } catch (err) {
     console.log("Error en la consulta a la BD:", err);
@@ -125,7 +103,7 @@ router.get('/ultimas', async (req, res) => {
     if (!Number.isFinite(limit) || limit < 1) limit = 200;
     limit = Math.min(limit, 1000);
 
-    // CHANGED previamente: añadidos `tabla_uid` y columnas de descabezado al SELECT.
+    // CHANGED: Se añade `tabla_uid` y las columnas de descabezado al SELECT.
     const sql = `
       SELECT id, tabla_id, tabla_uid, camara_id, device_id,
              ancho_mm, ancho_mm_base, delta_corr_mm, corregida,
@@ -163,6 +141,7 @@ router.get('/piezas', async (req, res) => {
     const TARGET_TZ = process.env.TARGET_TZ || 'Europe/Madrid';
     const FALLBACK_OFFSET_MIN = -new Date().getTimezoneOffset();
 
+    // NEW: Construcción dinámica de la cláusula WHERE
     const whereClauses = [
       `fecha BETWEEN ? AND ?`,
       `ancho_mm IS NOT NULL`,
@@ -182,6 +161,7 @@ router.get('/piezas', async (req, res) => {
     const totalRows = await db.query(countSql, params);
     const total = totalRows[0]?.total ?? 0;
 
+    // CHANGED: Se añade `tabla_uid` y TODAS las columnas `desc_*` al SELECT.
     const dataSql = `
       SELECT
         id, tabla_id, tabla_uid, camara_id, device_id,
