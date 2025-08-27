@@ -1,3 +1,4 @@
+// Express_MadEst/routes/login.js
 const express = require('express')
 const router = express.Router()
 const db = require('../lib/db');
@@ -40,12 +41,8 @@ router.post('/', async function (req, res) {
         }, process.env.TOKEN_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRATION })
 
         console.log("---------> Login Successful")
-        console.log("LOGIN RESPONSE ENVIADO:", {
-          accessToken: { accessToken },
-          refreshToken: { refreshToken },
-          message: 'Bienvenido ' + username + '!',
-          username: username
-        });
+        // [REMOVIDO] No imprimir tokens en logs por seguridad
+
         res.header('autorizado').json({
           accessToken: { accessToken },
           refreshToken: { refreshToken },
@@ -62,7 +59,5 @@ router.post('/', async function (req, res) {
 
   });
 });
-
-
 
 module.exports = router;
