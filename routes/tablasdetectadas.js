@@ -3,6 +3,14 @@ const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
 
+// ===== Longitud global por pieza (mm) para volumen real en m³ =====
+// Se puede ajustar en tiempo de ejecución antes de cargar este módulo:
+//   global.LONGITUD_PIEZA_MM = 2500;
+if (typeof global.LONGITUD_PIEZA_MM !== 'number') {
+  global.LONGITUD_PIEZA_MM = 2500; // 2,5 m en mm
+}
+const LONGITUD_PIEZA_MM = global.LONGITUD_PIEZA_MM;
+
 // --- RUTAS LEGACY (apuntan a la tabla antigua `tabla_detectada`) ---
 // Se mantienen por compatibilidad, pero las nuevas vistas deben usar las rutas de `medidas_cenital`.
 
@@ -55,7 +63,7 @@ router.get("/cubico-por-fecha", async function (req, res) {
   const periodoExpr = exprMap[fmt];
   if (!periodoExpr) return res.status(400).send("Agrupamiento no válido");
 
-  // NEW: Construcción dinámica de la cláusula WHERE
+  // WHERE dinámico
   const whereClauses = [
     `fecha BETWEEN ? AND ?`,
     `ancho_mm IS NOT NULL`,
@@ -68,18 +76,19 @@ router.get("/cubico-por-fecha", async function (req, res) {
   } else if (descabezadaFilter === 'desc') {
     whereClauses.push(`descabezada = 1`);
   }
-  // si es 'all', no se añade filtro de descabezada
 
+  // FIX: volumen real en m³ = (ancho_mm * grosor_lateral_mm * LONGITUD_PIEZA_MM) / 1e9
+  //     (antes: /1e6 ⇒ era un área m² etiquetada erróneamente como m³)
   const sql = `
     SELECT
-      x.periodo                  AS fecha,
-      x.grosor                   AS grosor_lateral_mm,
-      ROUND(SUM(x.volumen), 6)   AS volumen_cubico_m3
+      x.periodo                AS fecha,
+      x.grosor                 AS grosor_lateral_mm,
+      ROUND(SUM(x.volumen), 6) AS volumen_cubico_m3
     FROM (
       SELECT
-        ${periodoExpr}                          AS periodo,
-        ROUND(grosor_lateral_mm, 0)            AS grosor,
-        (ancho_mm * grosor_lateral_mm * 1) / 1e6 AS volumen
+        ${periodoExpr}                           AS periodo,
+        ROUND(grosor_lateral_mm, 0)             AS grosor,
+        (ancho_mm * grosor_lateral_mm * ?) / 1e9 AS volumen
       FROM medidas_cenital
       WHERE ${whereClauses.join(' AND ')}
     ) x
@@ -88,7 +97,8 @@ router.get("/cubico-por-fecha", async function (req, res) {
   `;
 
   try {
-    const rows = await db.query(sql, params);
+    // Nota: el primer placeholder (?) es LONGITUD_PIEZA_MM; luego van los del WHERE
+    const rows = await db.query(sql, [LONGITUD_PIEZA_MM, ...params]);
     res.json(rows);
   } catch (err) {
     console.log("Error en la consulta a la BD:", err);
@@ -141,7 +151,7 @@ router.get('/piezas', async (req, res) => {
     const TARGET_TZ = process.env.TARGET_TZ || 'Europe/Madrid';
     const FALLBACK_OFFSET_MIN = -new Date().getTimezoneOffset();
 
-    // NEW: Construcción dinámica de la cláusula WHERE
+    // WHERE dinámico
     const whereClauses = [
       `fecha BETWEEN ? AND ?`,
       `ancho_mm IS NOT NULL`,
