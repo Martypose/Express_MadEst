@@ -113,7 +113,6 @@ router.get('/ultimas', async (req, res) => {
     if (!Number.isFinite(limit) || limit < 1) limit = 200;
     limit = Math.min(limit, 1000);
 
-    // CHANGED: Se añade `tabla_uid` y las columnas de descabezado al SELECT.
     const sql = `
       SELECT id, tabla_id, tabla_uid, camara_id, device_id,
              ancho_mm, ancho_mm_base, delta_corr_mm, corregida,
@@ -121,7 +120,11 @@ router.get('/ultimas', async (req, res) => {
              ancho_px_mean, ancho_px_std, xl_px, xr_px, rows_valid,
              edge_left_mm, bbox_x, bbox_y, bbox_w, bbox_h, roi_y0, roi_y1,
              descabezada, desc_causa, desc_tip_score, desc_tip_ok,
-             desc_shape_taper_ratio, desc_shape_taper_drop
+             desc_shape_taper_ratio, desc_shape_taper_drop,
+             -- nuevas métricas de borde:
+             desc_edge_irregular, edge_rmse_l_px, edge_rmse_r_px,
+             edge_jitter_l_px, edge_jitter_r_px, widths_cv, rows_total, rows_kept,
+             desc_edge_reason
       FROM medidas_cenital
       ORDER BY id DESC
       LIMIT ${limit}
@@ -133,6 +136,8 @@ router.get('/ultimas', async (req, res) => {
     res.status(500).send('Error en la consulta a la BD');
   }
 });
+
+// ...
 
 router.get('/piezas', async (req, res) => {
   try {
@@ -151,7 +156,6 @@ router.get('/piezas', async (req, res) => {
     const TARGET_TZ = process.env.TARGET_TZ || 'Europe/Madrid';
     const FALLBACK_OFFSET_MIN = -new Date().getTimezoneOffset();
 
-    // WHERE dinámico
     const whereClauses = [
       `fecha BETWEEN ? AND ?`,
       `ancho_mm IS NOT NULL`,
@@ -171,7 +175,6 @@ router.get('/piezas', async (req, res) => {
     const totalRows = await db.query(countSql, params);
     const total = totalRows[0]?.total ?? 0;
 
-    // CHANGED: Se añade `tabla_uid` y TODAS las columnas `desc_*` al SELECT.
     const dataSql = `
       SELECT
         id, tabla_id, tabla_uid, camara_id, device_id,
@@ -189,7 +192,11 @@ router.get('/piezas', async (req, res) => {
         descabezada, desc_causa, desc_tip_score, desc_tip_ok, desc_tip_thr,
         desc_tip_roi_y0, desc_tip_roi_y1, desc_shape_taper_ratio,
         desc_shape_taper_drop, desc_shape_area_ratio, desc_shape_slope_norm,
-        desc_shape_centroid_pct
+        desc_shape_centroid_pct,
+        -- nuevas métricas de borde:
+        desc_edge_irregular, edge_rmse_l_px, edge_rmse_r_px,
+        edge_jitter_l_px, edge_jitter_r_px, widths_cv, rows_total, rows_kept,
+        desc_edge_reason
       FROM medidas_cenital
       WHERE ${whereSql}
       ORDER BY ${col} ${dir}
